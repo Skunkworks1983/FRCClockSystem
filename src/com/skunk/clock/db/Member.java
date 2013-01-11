@@ -8,7 +8,6 @@ import java.util.Arrays;
  */
 public class Member {
 	private final String name;
-	private final String first, last;
 	private final Long uuid;
 	private final MemberType type;
 	private final MemberGroup[] group;
@@ -40,24 +39,14 @@ public class Member {
 		}
 	}
 
-	Member(long uuid, String name, String first, String last, String img,
-			String badge, MemberType type, MemberGroup[] group) {
+	Member(long uuid, String name, String img, String badge, MemberType type,
+			MemberGroup[] group) {
 		this.name = name;
 		this.uuid = uuid;
 		this.type = type;
 		this.group = group;
-		this.first = first;
-		this.last = last;
 		this.img = img;
 		this.badge = badge;
-	}
-
-	public String getLast() {
-		return last;
-	}
-
-	public String getFirst() {
-		return first;
 	}
 
 	public String getBadge() {
@@ -69,13 +58,13 @@ public class Member {
 	}
 
 	public MemberGroup[] getGroups() {
-		return new MemberGroup[]{group[0]};
+		return new MemberGroup[] { group[0] };
 	}
 
 	public MemberGroup[] getGroupsAll() {
 		return group;
 	}
-	
+
 	/**
 	 * @deprecated
 	 */
@@ -107,8 +96,7 @@ public class Member {
 	}
 
 	public String toString() {
-		return getClass().getSimpleName() + "[uuid=" + getUUID() + ",first="
-				+ getFirst() + ",last=" + getLast() + ",type="
+		return getClass().getSimpleName() + "[uuid=" + getUUID() + ",type="
 				+ getType().formattedName() + ",groups="
 				+ Arrays.toString(getGroups()) + "]";
 	}

@@ -46,10 +46,10 @@ public class MemberDatabase implements Iterable<Member> {
 			currentLine++;
 			String[] chunks = line.split(",");
 			try {
-				if (chunks.length < 8) {
+				if (chunks.length < 6) {
 					throw new ArrayIndexOutOfBoundsException(
 							"Not enough array elements, found " + chunks.length
-									+ ", expecting 4 ");
+									+ ", expecting 6 ");
 				}
 				long uuid = Long.valueOf(chunks[0]);
 				MemberType type;
@@ -76,8 +76,8 @@ public class MemberDatabase implements Iterable<Member> {
 							+ " of 'data/members.csv'");
 					groups = new MemberGroup[] { MemberGroup.UNDEFINED };
 				}
-				Member mem = new Member(uuid, chunks[2], chunks[5], chunks[6],
-						chunks[4], chunks[7], type, groups);
+				Member mem = new Member(uuid, chunks[2], chunks[4], chunks[5],
+						type, groups);
 				membersByUUID.put(uuid, mem);
 				membersByBadge.put(mem.getBadge(), mem);
 			} catch (NumberFormatException e) {
