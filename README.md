@@ -1,6 +1,6 @@
 FRCClockSystem
 ==============
-_A UUID based quick clock-in and clock-out system that shows a member's photo._
+_A UUID based quick clock-in and clock-out system that shows a member's photo, originally designed for FRC Team 1983, [Skunkworks Robotics](http://ahsrobotics.us/)._
 Database Setup
 --------
 1. The Database Folder  
