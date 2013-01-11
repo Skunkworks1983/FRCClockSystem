@@ -9,9 +9,9 @@ The database folder is located at "./data", or the data folder inside your curre
 The members database is located at "./data/members.csv", and takes the form of comma seperated values.  Each line is formatted as follows:
 `UUID,Type,Name,Group(s),Image,BadgeID` where...  
 `UUID` is the integer-value identifier for that person.  
-`Type` is one of [Student, Mentor, or Coach]  (See Types).  
+`Type` is the user type. (See Types)  
 `Name` is the name of that person.  
-`Group(s)` is a space seperated list of that member's groups (See Groups).  
+`Group(s)` is a space seperated list of that member's groups. (See Groups)  
 `Image` is the name of that students image file.  
 `BadgeID` is that student's alternate, or badge ID.
 3. Image Storage  
