@@ -2,6 +2,8 @@ package com.skunk.clock.db;
 
 import java.util.Arrays;
 
+import com.skunk.clock.db.Member.MemberGroup;
+
 /**
  * @author westin
  * 
@@ -99,5 +101,14 @@ public class Member {
 		return getClass().getSimpleName() + "[uuid=" + getUUID() + ",type="
 				+ getType().formattedName() + ",groups="
 				+ Arrays.toString(getGroups()) + "]";
+	}
+
+	public boolean isInGroup(MemberGroup lead) {
+		for (MemberGroup g : group) {
+			if (lead == g) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

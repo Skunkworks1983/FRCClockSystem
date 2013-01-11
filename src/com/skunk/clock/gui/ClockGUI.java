@@ -195,7 +195,6 @@ public class ClockGUI extends JFrame implements KeyListener {
 		String[] errors = new String[] { "", "", "" };
 		boolean hadBadge = true;
 		try {
-			long start = System.currentTimeMillis();
 			Member m = memDB.getMemberByBadge(s);
 			if (m == null) {
 				m = memDB.getMemberByUUID(Long.valueOf(s));
@@ -228,7 +227,11 @@ public class ClockGUI extends JFrame implements KeyListener {
 					errors[0] = m.toString() + " checked out";
 				}
 			} else {
-				clockedIn.add(m);
+				if (m.isInGroup(MemberGroup.LEAD)) {
+					clockedIn.add(0, m);
+				} else {
+					clockedIn.add(m);
+				}
 				clockDB.getClocktime(m).clockIn(hadBadge);
 				if (interact) {
 					state = true;
@@ -236,8 +239,6 @@ public class ClockGUI extends JFrame implements KeyListener {
 					errors[0] = m.toString() + " checked in";
 				}
 			}
-			System.out.println("DB Mod Time: "
-					+ (System.currentTimeMillis() - start));
 			try {
 				loadUserProfile(m);
 			} catch (Exception ex) {
@@ -248,12 +249,7 @@ public class ClockGUI extends JFrame implements KeyListener {
 				currentMember = m;
 				currentTime = System.currentTimeMillis();
 			}
-			System.out.println("IMG Load Time: "
-					+ (System.currentTimeMillis() - start));
-			start = System.currentTimeMillis();
 			checkBuffers();
-			System.out.println("Buffer Build Time: "
-					+ (System.currentTimeMillis() - start));
 		} catch (NumberFormatException ex) {
 			errors[1] = "NaN: " + s;
 			errors[2] = "Not a number!";
@@ -412,17 +408,11 @@ public class ClockGUI extends JFrame implements KeyListener {
 	public void repaintLoop() {
 		synchronized (bufferLock) {
 			if (dirty.getAndSet(false)) {
-				long start = System.currentTimeMillis();
 				repaintClocked();
-				System.out.println("Render Time: "
-						+ (System.currentTimeMillis() - start));
 			} else if (currentTime < System.currentTimeMillis()
 					- CLOCKIN_DISPLAY_TIME - 10) {
 				if (loginPainted.getAndSet(false)) {
-					long start = System.currentTimeMillis();
 					repaintClocked();
-					System.out.println("Render Time: "
-							+ (System.currentTimeMillis() - start));
 				}
 			}
 		}
