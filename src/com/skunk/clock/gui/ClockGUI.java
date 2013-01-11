@@ -2,6 +2,8 @@ package com.skunk.clock.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -16,7 +18,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -35,8 +37,6 @@ import javax.swing.JScrollBar;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-
-import net.miginfocom.swing.MigLayout;
 
 import com.skunk.clock.Util;
 import com.skunk.clock.db.ClocktimeDatabase;
@@ -65,6 +65,7 @@ public class ClockGUI extends JFrame implements KeyListener {
 	private JPanel mentorPanel;
 	private JPanel studentPanel;
 	private JPanel changingPanel;
+	private JPanel controlPanel;
 
 	private Object bufferLock = new Object();
 	private VolatileImage mentors = null, students = null, changing = null;
@@ -102,24 +103,23 @@ public class ClockGUI extends JFrame implements KeyListener {
 		});
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
 		setContentPane(contentPane);
-		contentPane.setLayout(new MigLayout("",
-				"[grow][100px:100px:100px][::185,grow]", "[grow]"));
 		addKeyListener(this);
 		contentPane.addKeyListener(this);
 
 		studentPanel = new JPanel();
-		studentPanel.setBorder(new LineBorder(new Color(0, 0, 0)));
+		studentPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+		contentPane.add(studentPanel);
+		studentPanel.setLayout(new BorderLayout(0, 0));
+
+		studentScroll = new JScrollBar();
+		studentPanel.add(studentScroll, BorderLayout.WEST);
 		studentPanel.addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				checkBuffers();
 			}
 		});
-		contentPane.add(studentPanel, "cell 0 0,grow");
-		studentPanel.setLayout(new BorderLayout(0, 0));
-
-		studentScroll = new JScrollBar();
-		studentPanel.add(studentScroll, BorderLayout.WEST);
 		studentScroll.addAdjustmentListener(new AdjustmentListener() {
 			@Override
 			public void adjustmentValueChanged(AdjustmentEvent e) {
@@ -127,15 +127,16 @@ public class ClockGUI extends JFrame implements KeyListener {
 			}
 		});
 
-		JPanel controlPanel = new JPanel();
-		controlPanel.setBorder(new LineBorder(null));
-		contentPane.add(controlPanel, "cell 1 0,grow");
-		controlPanel.setLayout(new MigLayout("", "[114px,grow]",
-				"[19px][][grow]"));
+		controlPanel = new JPanel();
+		controlPanel.setBorder(new LineBorder(new Color(0, 0, 0)));
+		contentPane.add(controlPanel);
+		controlPanel.setLayout(new BorderLayout(0, 0));
 
-		lblEntryError = new JLabel("");
+		entryPanel = new JPanel();
+		controlPanel.add(entryPanel, BorderLayout.NORTH);
 
 		enter = new JTextField();
+		entryPanel.add(enter);
 		enter.addKeyListener(this);
 		enter.addActionListener(new ActionListener() {
 			@Override
@@ -146,23 +147,19 @@ public class ClockGUI extends JFrame implements KeyListener {
 				enter.setText("");
 			}
 		});
-		controlPanel.add(enter, "cell 0 0,alignx left,aligny top");
 		enter.setColumns(10);
 
-		controlPanel.add(lblEntryError, "cell 0 1");
+		lblEntryError = new JLabel("");
+		entryPanel.add(lblEntryError);
 
 		changingPanel = new JPanel();
-		controlPanel.add(changingPanel, "cell 0 2,grow");
+		controlPanel.add(changingPanel);
+		changingPanel.setLayout(null);
 
 		mentorPanel = new JPanel();
-		mentorPanel.setBorder(new LineBorder(null));
-		contentPane.add(mentorPanel, "cell 2 0,grow");
+		mentorPanel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		contentPane.add(mentorPanel);
 		mentorPanel.setLayout(new BorderLayout(0, 0));
-		mentorPanel.addComponentListener(new ComponentAdapter() {
-			public void componentResized(ComponentEvent e) {
-				checkBuffers();
-			}
-		});
 
 		mentorScroll = new JScrollBar();
 		mentorScroll.addAdjustmentListener(new AdjustmentListener() {
@@ -172,6 +169,21 @@ public class ClockGUI extends JFrame implements KeyListener {
 			}
 		});
 		mentorPanel.add(mentorScroll, BorderLayout.EAST);
+		mentorPanel.addComponentListener(new ComponentAdapter() {
+			public void componentResized(ComponentEvent e) {
+				checkBuffers();
+			}
+		});
+	}
+
+	public void validate() {
+		int cPanelWidth = 100;
+		mentorPanel.setPreferredSize(new Dimension(
+				(getWidth() - cPanelWidth) / 3, getHeight()));
+		controlPanel.setMaximumSize(new Dimension(cPanelWidth, getHeight()));
+		studentPanel.setPreferredSize(new Dimension(
+				2 * (getWidth() - cPanelWidth) / 3, getHeight()));
+		super.validate();
 	}
 
 	/**
@@ -499,20 +511,22 @@ public class ClockGUI extends JFrame implements KeyListener {
 	}
 
 	public void loadDB() {
-		System.out.println("Loading db...");
-		try {
-			memDB.read();
-		} catch (Exception e) {
-		}
-		System.out.println("Preallocating clock db...");
-		for (Member m : memDB) {
-			clockDB.getClocktime(m);
-		}
-		System.out.println("Loading user images...");
-		for (Member m : memDB) {
+		synchronized (bufferLock) {
+			System.out.println("Loading db...");
 			try {
-				loadUserProfile(m);
-			} catch (IOException e) {
+				memDB.read();
+			} catch (Exception e) {
+			}
+			System.out.println("Preallocating clock db...");
+			for (Member m : memDB) {
+				clockDB.getClocktime(m);
+			}
+			System.out.println("Loading user images...");
+			for (Member m : memDB) {
+				try {
+					loadUserProfile(m);
+				} catch (IOException e) {
+				}
 			}
 		}
 	}
@@ -526,6 +540,7 @@ public class ClockGUI extends JFrame implements KeyListener {
 	}
 
 	long lastFS = 0;
+	private JPanel entryPanel;
 
 	@Override
 	public void keyReleased(KeyEvent e) {
@@ -534,7 +549,7 @@ public class ClockGUI extends JFrame implements KeyListener {
 				return;
 			}
 			lastFS = System.currentTimeMillis();
-			// TODO
+			// TODO Fullscreen?
 			e.consume();
 		}
 	}
