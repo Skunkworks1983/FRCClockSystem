@@ -93,7 +93,7 @@ public class ClocktimeDatabase {
 		BufferedWriter writeTotals = new BufferedWriter(new FileWriter(totals));
 		BufferedWriter writeClocks = new BufferedWriter(new FileWriter(clocks));
 
-		writeTotals.write("UUID,Time (millis),Time (hours),Missing Badges");
+		writeTotals.write("UUID,Time (millis),Time (minutes),Missing Badges");
 		writeTotals.newLine();
 		writeClocks.write("UUID,Chunk count, (Chunk Start, Chunk End)...");
 		writeClocks.newLine();
@@ -102,8 +102,8 @@ public class ClocktimeDatabase {
 			if (clock.getValue().getClockTime() > 0) {
 				writeTotals.write(clock.getKey().getUUID() + ","
 						+ clock.getValue().getClockTime() + ","
-						+ Util.formatTime(clock.getValue().getClockTime())
-						+ "," + clock.getValue().getMissingBadgeCount());
+						+ clock.getValue().getClockTime() / 60000 + ","
+						+ clock.getValue().getMissingBadgeCount());
 				writeTotals.newLine();
 				writeClocks.write(clock.getKey().getUUID() + ","
 						+ clock.getValue().getChunksString());

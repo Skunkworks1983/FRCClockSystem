@@ -2,8 +2,6 @@ package com.skunk.clock.db;
 
 import java.util.Arrays;
 
-import com.skunk.clock.db.Member.MemberGroup;
-
 /**
  * @author westin
  * 

@@ -207,17 +207,21 @@ public class ClockGUI extends JFrame implements KeyListener {
 				clockedIn.remove(m);
 				clockDB.getClocktime(m).clockOut(hadBadge);
 				if (m.getType() == MemberType.COACH) {
-					clockedIn.clear();
-					clockDB.clockOutAllWith(60 * 60 * 1000);
-					clockedIn.clear();
-					try {
-						clockDB.save();
-					} catch (IOException e1) {
-						if (interact) {
+					if (!interact) {
+						errors[1] = "Coaches can't sign out through terminal...";
+						return errors;
+					}
+					if (JOptionPane.showConfirmDialog(this,
+							"Do you wish to check all members out?",
+							"Coach Clocking Out...", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+						clockedIn.clear();
+						clockDB.clockOutAllWith(60 * 60 * 1000);
+						clockedIn.clear();
+						try {
+							clockDB.save();
+						} catch (IOException e1) {
 							JOptionPane.showMessageDialog(ClockGUI.this,
 									e1.toString());
-						} else {
-							errors[1] = e1.toString();
 						}
 					}
 				}
