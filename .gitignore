@@ -7,5 +7,7 @@
 *.zip
 
 data/*
-.project/*
-.metadata/*
+.project
+.classpath
+.settings/*
+
