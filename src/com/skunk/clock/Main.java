@@ -48,15 +48,7 @@ public class Main {
 										if (s == null)
 											break;
 										String[] chunks = s.split(" ");
-										if (chunks.length >= 2
-												&& chunks[0]
-														.equalsIgnoreCase("login")) {
-											String[] info = frame.login(
-													chunks[1], false);
-											write.write(info[0] + "\t"
-													+ info[1] + "\t" + info[2]);
-											write.newLine();
-										} else if (chunks.length >= 1
+										if (chunks.length >= 1
 												&& chunks[0]
 														.equalsIgnoreCase("students")) {
 											write.write("--Students Clocked In--");
@@ -86,14 +78,26 @@ public class Main {
 												write.newLine();
 											}
 										} else {
-											write.write("--HELP--");
-											write.newLine();
-											write.write("students\tLists clocked in students.");
-											write.newLine();
-											write.write("mentors\tLists clocked in mentors.");
-											write.newLine();
-											write.write("login <UUID>\tClocks a user in or out");
-											write.newLine();
+											try {
+												Long.valueOf(chunks[0]
+														.toUpperCase().replace(
+																"S", ""));
+												String[] info = frame.login(
+														chunks[0], false);
+												write.write(info[0] + "\t"
+														+ info[1] + "\t"
+														+ info[2]);
+												write.newLine();
+											} catch (Exception e) {
+												write.write("--HELP--");
+												write.newLine();
+												write.write("students\tLists clocked in students.");
+												write.newLine();
+												write.write("mentors\tLists clocked in mentors.");
+												write.newLine();
+												write.write("<UUID>\tClocks a user in or out");
+												write.newLine();
+											}
 										}
 										write.flush();
 									}
