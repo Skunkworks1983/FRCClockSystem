@@ -97,4 +97,8 @@ public class MemberDatabase implements Iterable<Member> {
 	public Iterator<Member> iterator() {
 		return membersByUUID.values().iterator();
 	}
+
+	public int size() {
+		return membersByUUID.size();
+	}
 }

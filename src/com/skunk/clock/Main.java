@@ -1,5 +1,6 @@
 package com.skunk.clock;
 
+import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
@@ -22,7 +23,23 @@ public class Main {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		Dimension size = null;
+		for (String s : args) {
+			if (s.startsWith("size=")) {
+				String[] chunks = s.substring(5).split("x");
+				if (chunks.length == 2) {
+					try {
+						size = new Dimension(Integer.valueOf(chunks[0]),
+								Integer.valueOf(chunks[1]));
+					} catch (Exception e) {
+					}
+				}
+			}
+		}
 		final ClockGUI frame = new ClockGUI();
+		if (size != null) {
+			frame.setSize(size);
+		}
 		frame.setVisible(true);
 		frame.loadDB();
 		new Thread(new Runnable() {

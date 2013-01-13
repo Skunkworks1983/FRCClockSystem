@@ -516,9 +516,12 @@ public class ClockGUI extends JFrame implements KeyListener {
 				clockDB.getClocktime(m);
 			}
 			System.out.println("Loading user images...");
+			int i = 0;
 			for (Member m : memDB) {
 				try {
 					loadUserProfile(m);
+					System.out.println("Loaded image for " + m.getName() + " -> "
+							+ m.getIMG() + "\t(" + (i++) + "/" + memDB.size());
 				} catch (IOException e) {
 				}
 			}

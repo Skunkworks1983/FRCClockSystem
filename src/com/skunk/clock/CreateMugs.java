@@ -21,10 +21,13 @@ public class CreateMugs {
 	public static void main(String[] args) throws IOException {
 		MemberDatabase memDB = new MemberDatabase();
 		memDB.read();
+		int i = 0;
 		for (Member m : memDB) {
 			BufferedImage img = create(
 					new File("data/mugs_large/" + m.getIMG()), m.getName());
 			ImageIO.write(img, "JPG", new File("data/mugs/" + m.getIMG()));
+			System.out.println("Processed image for " + m.getName() + " -> "
+					+ m.getIMG() + "\t(" + (i++) + "/" + memDB.size());
 		}
 	}
 

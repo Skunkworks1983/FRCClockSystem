@@ -15,7 +15,7 @@ The members database is located at "./data/members.csv", and takes the form of c
 `Image` is the name of that students image file.  
 `BadgeID` is that student's alternate, or badge ID.
 3. Image Storage  
-Generated images are stored in the "./data/mugs" folder.  These images are already resized to the optimal size and have a nametag attached.  Un-processed images are stored in the "./data/mugs_large" folder, and can be processed running the "create_mugs" script, or the class "com.skunk.clock.CreateMugs".
+Generated images are stored in the "./data/mugs" folder.  These images are already resized to the optimal size and have a nametag attached.  Un-processed images are stored in the "./data/mugs_large" folder, and can be processed running the command "java -cp classpath com.skunk.clock.CreateMugs" from a shell inside "./"
 
 Information
 --------
