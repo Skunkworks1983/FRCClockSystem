@@ -13,6 +13,8 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
@@ -174,6 +176,12 @@ public class ClockGUI extends JFrame implements KeyListener {
 				checkBuffers();
 			}
 		});
+		enter.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				enter.requestFocusInWindow();
+			}
+		});
 	}
 
 	public void validate() {
@@ -220,8 +228,7 @@ public class ClockGUI extends JFrame implements KeyListener {
 						try {
 							clockDB.save();
 						} catch (IOException e1) {
-							JOptionPane.showMessageDialog(ClockGUI.this,
-									e1.toString());
+							JOptionPane.showMessageDialog(null, e1.toString());
 						}
 					}
 				}
@@ -520,8 +527,9 @@ public class ClockGUI extends JFrame implements KeyListener {
 			for (Member m : memDB) {
 				try {
 					loadUserProfile(m);
-					System.out.println("Loaded image for " + m.getName() + " -> "
-							+ m.getIMG() + "\t(" + (i++) + "/" + memDB.size());
+					System.out.println("Loaded image for " + m.getName()
+							+ " -> " + m.getIMG() + "\t(" + (i++) + "/"
+							+ memDB.size());
 				} catch (IOException e) {
 				}
 			}

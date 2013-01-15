@@ -7,7 +7,6 @@ if [ ! `id -u` == 0 ]; then
 fi
 # Test Programs
 type java 2>/dev/null || { echo >&2 "I require java but it's not installed.  Aborting."; exit 1; }
-type xterm 2>/dev/null || { echo >&2 "I require xterm but it's not installed.  Aborting."; exit 1; }
 
 # Get user name
 echo "Please enter a user name to run under..."
@@ -60,3 +59,23 @@ cd \"/home/$username/clock\"
 java -jar \"clock.jar\" size=\$res" >> "/home/$username/.xinitrc"
 chmod +x "/home/$username/.xinitrc"
 chown $username:$username -R "/home/$username/"
+
+
+echo "#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          rc.local
+# Required-Start:    $all
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: Run the stuff
+### END INIT INFO
+
+case \"$1\" in
+    start)
+	sudo -u $username startx
+        ;;
+esac" >> /etc/init.d/clockinsystem
+chmod +x /etc/init.d/clockinsystem
+
+update-rc.d clockinsystem enable 5
