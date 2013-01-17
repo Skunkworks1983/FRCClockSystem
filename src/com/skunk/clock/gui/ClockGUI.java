@@ -73,6 +73,7 @@ public class ClockGUI extends JFrame implements KeyListener {
 	private VolatileImage mentors = null, students = null, changing = null;
 	private int[] groupBaseline = new int[MemberGroup.values().length];
 	private AtomicBoolean dirty = new AtomicBoolean();
+	private AtomicBoolean loginPainted = new AtomicBoolean();
 
 	private Map<Long, Image> images = new HashMap<Long, Image>();
 
@@ -143,7 +144,7 @@ public class ClockGUI extends JFrame implements KeyListener {
 		enter.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String[] info = login(enter.getText().trim(), true);
+				String[] info = clockInOut(enter.getText().trim(), true);
 				lblEntryError.setText(info[1]);
 				lblEntryError.setToolTipText(info[2]);
 				enter.setText("");
@@ -194,12 +195,7 @@ public class ClockGUI extends JFrame implements KeyListener {
 		super.validate();
 	}
 
-	/**
-	 * 
-	 * @param s
-	 * @return error
-	 */
-	public String[] login(String s, boolean interact) {
+	public String[] clockInOut(String s, boolean interact) {
 		String[] errors = new String[] { "", "", "" };
 		boolean hadBadge = true;
 		try {
@@ -414,8 +410,6 @@ public class ClockGUI extends JFrame implements KeyListener {
 		}
 	}
 
-	AtomicBoolean loginPainted = new AtomicBoolean();
-
 	public void repaintLoop() {
 		synchronized (bufferLock) {
 			if (dirty.getAndSet(false)) {
@@ -518,10 +512,23 @@ public class ClockGUI extends JFrame implements KeyListener {
 				memDB.read();
 			} catch (Exception e) {
 			}
+			System.out.println("Checking for recovery image...");
+			try {
+				clockDB.load(memDB);
+			} catch (IOException e) {
+			}
+
 			System.out.println("Preallocating clock db...");
 			for (Member m : memDB) {
-				clockDB.getClocktime(m);
+				if (clockDB.getClocktime(m).isClockedIn()) {
+					if (m.isInGroup(MemberGroup.LEAD)) {
+						clockedIn.add(0, m);
+					} else {
+						clockedIn.add(m);
+					}
+				}
 			}
+			
 			System.out.println("Loading user images...");
 			int i = 0;
 			for (Member m : memDB) {

@@ -1,7 +1,9 @@
 package com.skunk.clock.db;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -78,12 +80,26 @@ public class ClocktimeDatabase {
 		}
 	}
 
-	public void clockOutAllWith(int i) {
+	/**
+	 * Clocks out all clocked-in members with the given amount of time in the
+	 * last clock-time chunk.
+	 * 
+	 * @param time
+	 *            the time in milliseconds
+	 */
+	public void clockOutAllWith(long time) {
 		for (Clocktime c : clocktimes.values()) {
-			c.clockOutWith(i);
+			c.clockOutWith(time);
 		}
 	}
 
+	/**
+	 * Saves both the overall data file and the raw chunk file with the full
+	 * date prefixes.
+	 * 
+	 * @throws IOException
+	 *             if an error occurs
+	 */
 	public void save() throws IOException {
 		String date = Util.formatDate(new Date());
 
@@ -91,12 +107,9 @@ public class ClocktimeDatabase {
 		File clocks = new File("data/time_chunk_" + date + ".csv");
 
 		BufferedWriter writeTotals = new BufferedWriter(new FileWriter(totals));
-		BufferedWriter writeClocks = new BufferedWriter(new FileWriter(clocks));
 
 		writeTotals.write("UUID,Time (millis),Time (minutes),Missing Badges");
 		writeTotals.newLine();
-		writeClocks.write("UUID,Chunk count, (Chunk Start, Chunk End)...");
-		writeClocks.newLine();
 
 		for (Entry<Member, Clocktime> clock : clocktimes.entrySet()) {
 			if (clock.getValue().getClockTime() > 0) {
@@ -105,14 +118,99 @@ public class ClocktimeDatabase {
 						+ clock.getValue().getClockTime() / 60000 + ","
 						+ clock.getValue().getMissingBadgeCount());
 				writeTotals.newLine();
+			}
+		}
+		writeTotals.close();
+		writeRawData(clocks, true);
+		System.out.println("Wrote " + clocktimes.size() + " records to '"
+				+ clocks.getName() + "' and '" + totals.getName() + "'");
+		new File("data/cached.csv").delete();
+	}
+
+	/**
+	 * Writes raw clock information to the given file.
+	 * 
+	 * @param f
+	 *            the file to write information to
+	 * @param header
+	 *            if a column header should be written.
+	 * @throws IOException
+	 *             if an error occurs
+	 */
+	private void writeRawData(File f, boolean header) throws IOException {
+		BufferedWriter writeClocks = new BufferedWriter(new FileWriter(f));
+		if (header) {
+			writeClocks
+					.write("UUID, Missing Badges, Chunk count, (Chunk Start, Chunk End)...");
+			writeClocks.newLine();
+		}
+		for (Entry<Member, Clocktime> clock : clocktimes.entrySet()) {
+			if (clock.getValue().getClockTime() > 0) {
 				writeClocks.write(clock.getKey().getUUID() + ","
+						+ clock.getValue().getMissingBadgeCount() + ","
 						+ clock.getValue().getChunksString());
 				writeClocks.newLine();
 			}
 		}
-		System.out.println("Wrote " + clocktimes.size() + " records to '"
-				+ clocks.getName() + "' and '" + totals.getName() + "'");
-		writeTotals.close();
 		writeClocks.close();
+	}
+
+	/**
+	 * Saves the current raw data in the cached data file, for bootup-recovery.
+	 * Also moves the old cache file to 'cached.csv.old'.
+	 * 
+	 * @throws IOException
+	 *             if an error occurs
+	 */
+	public void cachedSave() throws IOException {
+		File oldClocks = new File("data/cached.csv");
+		File clocks = new File("data/cached.csv.tmp");
+		writeRawData(clocks, false);
+		if (oldClocks.exists()) {
+			oldClocks.renameTo(new File("data/cached.csv.old"));
+		}
+		clocks.renameTo(oldClocks);
+	}
+
+	/**
+	 * Loads the clock time database from the last created cache file, if it
+	 * exists.
+	 * 
+	 * @param memDB
+	 *            the member database used to lookup IDs
+	 * @throws IOException
+	 *             if an error occurs
+	 */
+	public void load(MemberDatabase memDB) throws IOException {
+		File clocks = new File("data/cached.csv");
+		if (clocks.exists()) {
+			System.out.println("Found cached state... loading");
+			BufferedReader reader = new BufferedReader(new FileReader(clocks));
+			while (true) {
+				String s = reader.readLine();
+				if (s == null) {
+					break;
+				}
+				String[] chunks = s.split(",");
+				if (chunks.length > 2) {
+					try {
+						long uuid = Long.valueOf(chunks[0]);
+						Member mem = memDB.getMemberByUUID(uuid);
+						if (mem != null) {
+							Clocktime c = new Clocktime();
+							c.setMissingBadges(Integer.valueOf(chunks[1]));
+							for (int i = 4; i < chunks.length; i += 2) {
+								long start = Long.valueOf(chunks[i - 1]);
+								long end = Long.valueOf(chunks[i]);
+								c.insertClockTime(start, end);
+							}
+							clocktimes.put(mem, c);
+						}
+					} catch (Exception e) {
+					}
+				}
+			}
+			reader.close();
+		}
 	}
 }
