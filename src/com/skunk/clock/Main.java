@@ -42,6 +42,26 @@ public class Main {
 		}
 		frame.setVisible(true);
 		frame.loadDB();
+
+		// createCreepyServer(frame);
+		
+		while (frame.isVisible()) {
+			frame.repaintLoop();
+			try {
+				Thread.sleep(100L);
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+
+	/**
+	 * A useless and unused feature that allows people to send plaintext queries
+	 * to the program to clock in and out.
+	 * 
+	 * @param frame
+	 *            the frame to work with.
+	 */
+	private static void createCreepyServer(final ClockGUI frame) {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -99,8 +119,9 @@ public class Main {
 												Long.valueOf(chunks[0]
 														.toUpperCase().replace(
 																"S", ""));
-												String[] info = frame.login(
-														chunks[0], false);
+												String[] info = frame
+														.clockInOut(chunks[0],
+																false);
 												write.write(info[0] + "\t"
 														+ info[1] + "\t"
 														+ info[2]);
@@ -131,12 +152,5 @@ public class Main {
 				}
 			}
 		}).start();
-		while (frame.isVisible()) {
-			frame.repaintLoop();
-			try {
-				Thread.sleep(100L);
-			} catch (InterruptedException e) {
-			}
-		}
 	}
 }
