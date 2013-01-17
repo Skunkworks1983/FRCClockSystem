@@ -61,14 +61,18 @@ java -jar \"clock.jar\" size=\$res" >> "/home/$username/.xinitrc"
 chmod +x "/home/$username/.xinitrc"
 chown $username:$username -R "/home/$username/"
 
-echo "Registering X-server as local user startup script"
-echo "startx" >> "/home/$username/.bashrc"
+echo -n "Would you like the program to start on computer startup? (Y/n) "
+read opt
+if [ "$opt" == "Y" ]; then
+	echo "Registering X-server as local user startup script"
+	echo "startx" >> "/home/$username/.bashrc"
 
-echo "Patching inittab to login as user on startup..."
-cp /etc/inittab /etc/inittab.old
-echo "54c54,55
-< 1:2345:respawn:/sbin/getty --noclear 38400 tty1 
----
-> #1:2345:respawn:/sbin/getty --noclear 38400 tty1 
-> 1:2345:respawn:/bin/login -f $username tty1 </dev/tty1 >/dev/tty1 2>&1
-" | patch -p1 /etc/inittab
+	echo "Patching inittab to login as user on startup..."
+	cp /etc/inittab /etc/inittab.old
+	echo "54c54,55
+	< 1:2345:respawn:/sbin/getty --noclear 38400 tty1 
+	---
+	> #1:2345:respawn:/sbin/getty --noclear 38400 tty1 
+	> 1:2345:respawn:/bin/login -f $username tty1 </dev/tty1 >/dev/tty1 2>&1
+	" | patch -p1 /etc/inittab
+fi
