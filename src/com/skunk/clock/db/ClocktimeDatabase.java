@@ -145,12 +145,10 @@ public class ClocktimeDatabase {
 			writeClocks.newLine();
 		}
 		for (Entry<Member, Clocktime> clock : clocktimes.entrySet()) {
-			if (clock.getValue().getClockTime() > 0) {
-				writeClocks.write(clock.getKey().getUUID() + ","
-						+ clock.getValue().getMissingBadgeCount() + ","
-						+ clock.getValue().getChunksString());
-				writeClocks.newLine();
-			}
+			writeClocks.write(clock.getKey().getUUID() + ","
+					+ clock.getValue().getMissingBadgeCount() + ","
+					+ clock.getValue().getChunksString());
+			writeClocks.newLine();
 		}
 		writeClocks.close();
 	}
