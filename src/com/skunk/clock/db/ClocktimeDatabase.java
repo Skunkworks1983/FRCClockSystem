@@ -3,9 +3,11 @@ package com.skunk.clock.db;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.SyncFailedException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -106,7 +108,11 @@ public class ClocktimeDatabase {
 		File totals = new File("data/time_total_" + date + ".csv");
 		File clocks = new File("data/time_chunk_" + date + ".csv");
 
-		BufferedWriter writeTotals = new BufferedWriter(new FileWriter(totals));
+		FileOutputStream totalsFout = new FileOutputStream(totals);
+		FileOutputStream clocksFout = new FileOutputStream(clocks);
+
+		BufferedWriter writeTotals = new BufferedWriter(new OutputStreamWriter(
+				totalsFout));
 
 		writeTotals.write("UUID,Time (millis),Time (minutes),Missing Badges");
 		writeTotals.newLine();
@@ -120,8 +126,26 @@ public class ClocktimeDatabase {
 				writeTotals.newLine();
 			}
 		}
-		writeTotals.close();
-		writeRawData(clocks, true);
+		writeTotals.flush();
+		
+		writeRawData(clocksFout, true);
+
+		try {
+			clocksFout.flush();
+			clocksFout.getFD().sync();
+		} catch (SyncFailedException e) {
+			System.out.println(e.getMessage());
+		}
+		clocksFout.close();
+		
+		try {
+			totalsFout.flush();
+			totalsFout.getFD().sync();
+		} catch (SyncFailedException e) {
+			System.out.println(e.getMessage());
+		}
+		totalsFout.close();
+
 		System.out.println("Wrote " + clocktimes.size() + " records to '"
 				+ clocks.getName() + "' and '" + totals.getName() + "'");
 		new File("data/cached.csv").delete();
@@ -137,8 +161,10 @@ public class ClocktimeDatabase {
 	 * @throws IOException
 	 *             if an error occurs
 	 */
-	private void writeRawData(File f, boolean header) throws IOException {
-		BufferedWriter writeClocks = new BufferedWriter(new FileWriter(f));
+	private void writeRawData(FileOutputStream f, boolean header)
+			throws IOException {
+		BufferedWriter writeClocks = new BufferedWriter(new OutputStreamWriter(
+				f));
 		if (header) {
 			writeClocks
 					.write("UUID, Missing Badges, Chunk count, (Chunk Start, Chunk End)...");
@@ -150,7 +176,7 @@ public class ClocktimeDatabase {
 					+ clock.getValue().getChunksString());
 			writeClocks.newLine();
 		}
-		writeClocks.close();
+		writeClocks.flush();
 	}
 
 	/**
@@ -163,11 +189,24 @@ public class ClocktimeDatabase {
 	public void cachedSave() throws IOException {
 		File oldClocks = new File("data/cached.csv");
 		File clocks = new File("data/cached.csv.tmp");
-		writeRawData(clocks, false);
-		if (oldClocks.exists()) {
-			oldClocks.renameTo(new File("data/cached.csv.old"));
+
+		FileOutputStream fOut = new FileOutputStream(clocks);
+		writeRawData(fOut, false);
+
+		fOut.flush();
+		try {
+			fOut.getFD().sync();
+		} catch (SyncFailedException e) {
+			System.out.println(e.getMessage());
 		}
-		clocks.renameTo(oldClocks);
+		fOut.close();
+
+		if (oldClocks.exists()) {
+			System.out.println("Moving old cached data: "
+					+ oldClocks.renameTo(new File("data/cached.csv.old")));
+		}
+		System.out.println("Moving new cached data: "
+				+ clocks.renameTo(new File("data/cached.csv")));
 	}
 
 	/**
