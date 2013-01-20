@@ -31,14 +31,14 @@ public class ClocktimeDatabase {
 				if (entry.getKey().getType() == t
 						&& entry.getValue().isClockedIn()) {
 					count[0]++;
-					for (MemberGroup g : entry.getKey().getGroups()) {
+					for (MemberGroup g : entry.getKey().getDisplayedGroups()) {
 						count[g.ordinal() + 1]++;
 					}
 					break;
 				}
 			}
 			if (types.length == 0) {
-				for (MemberGroup g : entry.getKey().getGroups()) {
+				for (MemberGroup g : entry.getKey().getDisplayedGroups()) {
 					count[g.ordinal() + 1]++;
 				}
 				count[0]++;

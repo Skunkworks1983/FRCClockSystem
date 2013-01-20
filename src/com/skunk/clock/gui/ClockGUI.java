@@ -340,7 +340,7 @@ public class ClockGUI extends JFrame {
 			for (Member mem : clockedIn) {
 				Image i = images.get(mem.getUUID());
 				if (mem.getType() == MemberType.STUDENT) {
-					for (MemberGroup group : mem.getGroups()) {
+					for (MemberGroup group : mem.getDisplayedGroups()) {
 						int panelX = studentID[group.ordinal()]
 								% (int) (studentBuffer.getWidth() / Configuration.MUG_WIDTH)
 								* (Configuration.MUG_WIDTH + Configuration.MUG_H_PADDING)
@@ -450,13 +450,6 @@ public class ClockGUI extends JFrame {
 						y += strBounds.getHeight() + 5);
 
 				strBounds = v.getFontMetrics().getStringBounds(
-						lastMemberClockState ? "Checked In" : "Checked Out", v);
-				v.drawString(lastMemberClockState ? "Checked In"
-						: "Checked Out", (infoBuffer.getWidth() / 2)
-						- (int) (strBounds.getWidth() / 2),
-						y += strBounds.getHeight() + 5);
-
-				strBounds = v.getFontMetrics().getStringBounds(
 						"Time: "
 								+ Util.formatTime(clockDB.getClocktime(
 										lastMember).getClockTime()), v);
@@ -477,6 +470,16 @@ public class ClockGUI extends JFrame {
 									- (int) (strBounds.getWidth() / 2),
 							y += strBounds.getHeight() + 5);
 				}
+				
+				Font f = v.getFont();
+				v.setFont(v.getFont().deriveFont(Font.BOLD).deriveFont(24f));
+				strBounds = v.getFontMetrics().getStringBounds(
+						lastMemberClockState ? "In" : "Out", v);
+				v.drawString(lastMemberClockState ? "In"
+						: "Out", (infoBuffer.getWidth() / 2)
+						- (int) (strBounds.getWidth() / 2),
+						y += strBounds.getHeight() + 5);
+				v.setFont(f);
 			}
 			String date = DateFormat.getTimeInstance().format(new Date());
 			Rectangle2D strBounds = v.getFontMetrics().getStringBounds(date, v);

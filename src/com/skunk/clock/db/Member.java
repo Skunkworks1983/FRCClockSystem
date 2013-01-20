@@ -57,19 +57,12 @@ public class Member {
 		return img;
 	}
 
-	public MemberGroup[] getGroups() {
+	public MemberGroup[] getDisplayedGroups() {
 		return new MemberGroup[] { group[0] };
 	}
 
-	public MemberGroup[] getGroupsAll() {
+	public MemberGroup[] getGroups() {
 		return group;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	public MemberGroup getGroup() {
-		return group[0];
 	}
 
 	public MemberType getType() {
@@ -98,7 +91,7 @@ public class Member {
 	public String toString() {
 		return getClass().getSimpleName() + "[uuid=" + getUUID() + ",type="
 				+ getType().formattedName() + ",groups="
-				+ Arrays.toString(getGroups()) + "]";
+				+ Arrays.toString(getDisplayedGroups()) + "]";
 	}
 
 	public boolean isInGroup(MemberGroup lead) {
