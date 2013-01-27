@@ -15,15 +15,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.skunk.clock.Configuration;
 import com.skunk.clock.Util;
 import com.skunk.clock.db.Member.MemberGroup;
 import com.skunk.clock.db.Member.MemberType;
 
 public class ClocktimeDatabase {
 	private final Map<Member, Clocktime> clocktimes;
+	private final long creation;
 
 	public ClocktimeDatabase() {
 		this.clocktimes = new HashMap<Member, Clocktime>();
+		creation = System.currentTimeMillis();
 	}
 
 	public int[] getClockedByType(MemberType... types) {
@@ -127,7 +130,7 @@ public class ClocktimeDatabase {
 			}
 		}
 		writeTotals.flush();
-		
+
 		writeRawData(clocksFout, true);
 
 		try {
@@ -137,7 +140,7 @@ public class ClocktimeDatabase {
 			System.out.println(e.getMessage());
 		}
 		clocksFout.close();
-		
+
 		try {
 			totalsFout.flush();
 			totalsFout.getFD().sync();
@@ -165,6 +168,8 @@ public class ClocktimeDatabase {
 			throws IOException {
 		BufferedWriter writeClocks = new BufferedWriter(new OutputStreamWriter(
 				f));
+		writeClocks.write(String.valueOf(creation));
+		writeClocks.newLine();
 		if (header) {
 			writeClocks
 					.write("UUID, Missing Badges, Chunk count, (Chunk Start, Chunk End)...");
@@ -223,7 +228,18 @@ public class ClocktimeDatabase {
 		if (clocks.exists()) {
 			System.out.println("Found cached state... loading");
 			BufferedReader reader = new BufferedReader(new FileReader(clocks));
-			while (true) {
+			long timeStamp = -1;
+			try {
+				timeStamp = Long.valueOf(reader.readLine());
+				if (creation - timeStamp > Configuration.CACHE_EXIPRY_TIME) {
+					System.out.println("...but the cached state has expired.");
+					timeStamp = -1;
+				}
+			} catch (Exception e) {
+				System.out
+						.println("...but the cached state has an invalid timestamp.");
+			}
+			while (timeStamp != -1) {
 				String s = reader.readLine();
 				if (s == null) {
 					break;

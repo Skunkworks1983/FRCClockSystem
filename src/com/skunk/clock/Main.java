@@ -67,8 +67,9 @@ public class Main {
 	 * to the program to clock in and out.
 	 * 
 	 * @param frame
-	 *            the frame to work with.
+	 *            the frame to work with.          
 	 */
+	@SuppressWarnings("unused")
 	private static void createCreepyServer(final ClockGUI frame) {
 		new Thread(new Runnable() {
 			@Override

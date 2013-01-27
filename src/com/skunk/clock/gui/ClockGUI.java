@@ -234,12 +234,11 @@ public class ClockGUI extends JFrame {
 	 */
 	@Override
 	public void validate() {
-		int cPanelWidth = 100;
 		mentorPanel.setPreferredSize(new Dimension(
-				(getWidth() - cPanelWidth) / 3, getHeight()));
-		controlPanel.setMaximumSize(new Dimension(cPanelWidth, getHeight()));
+				(getWidth() - Configuration.CENTER_WIDTH) / 3, getHeight()));
+		controlPanel.setMaximumSize(new Dimension(Configuration.CENTER_WIDTH, getHeight()));
 		studentPanel.setPreferredSize(new Dimension(
-				2 * (getWidth() - cPanelWidth) / 3, getHeight()));
+				2 * (getWidth() - Configuration.CENTER_WIDTH) / 3, getHeight()));
 		super.validate();
 	}
 
@@ -425,10 +424,10 @@ public class ClockGUI extends JFrame {
 				Image id = images.get(lastMember.getUUID());
 				if (id != null) {
 					v.drawImage(id, (infoBuffer.getWidth() / 2)
-							- (Configuration.MUG_WIDTH / 2), 0,
+							- (Configuration.MUG_CENTRAL_WIDTH / 2), 0,
 							(infoBuffer.getWidth() / 2)
-									+ (Configuration.MUG_WIDTH / 2),
-							Configuration.MUG_HEIGHT, 0, 0,
+									+ (Configuration.MUG_CENTRAL_WIDTH / 2),
+							Configuration.MUG_CENTRAL_HEIGHT, 0, 0,
 							Configuration.MUG_WIDTH, Configuration.MUG_HEIGHT,
 							null);
 				}
@@ -436,7 +435,7 @@ public class ClockGUI extends JFrame {
 
 				Rectangle2D strBounds = v.getFontMetrics().getStringBounds(
 						lastMember.getName(), v);
-				int y = (id != null ? id.getHeight(null) : 0)
+				int y = (id != null ? Configuration.MUG_CENTRAL_HEIGHT : 0)
 						+ (int) strBounds.getHeight();
 				v.drawString(lastMember.getName(), (infoBuffer.getWidth() / 2)
 						- (int) (strBounds.getWidth() / 2), y);
@@ -470,17 +469,22 @@ public class ClockGUI extends JFrame {
 									- (int) (strBounds.getWidth() / 2),
 							y += strBounds.getHeight() + 5);
 				}
-				
+
 				Font f = v.getFont();
 				v.setFont(v.getFont().deriveFont(Font.BOLD).deriveFont(24f));
+				v.setColor(lastMemberClockState ? Color.GREEN : Color.RED);
 				strBounds = v.getFontMetrics().getStringBounds(
 						lastMemberClockState ? "In" : "Out", v);
-				v.drawString(lastMemberClockState ? "In"
-						: "Out", (infoBuffer.getWidth() / 2)
-						- (int) (strBounds.getWidth() / 2),
+				v.drawString(
+						lastMemberClockState ? "In" : "Out",
+						(infoBuffer.getWidth() / 2)
+								- (int) (strBounds.getWidth() / 2),
 						y += strBounds.getHeight() + 5);
 				v.setFont(f);
 			}
+			v.setColor(Color.BLACK);
+			Font f = v.getFont();
+			v.setFont(v.getFont().deriveFont(Font.BOLD).deriveFont(20f));
 			String date = DateFormat.getTimeInstance().format(new Date());
 			Rectangle2D strBounds = v.getFontMetrics().getStringBounds(date, v);
 			v.drawString(date,
@@ -488,6 +492,7 @@ public class ClockGUI extends JFrame {
 							- (int) (strBounds.getWidth() / 2),
 					infoBuffer.getHeight() - 10);
 			g.drawImage(infoBuffer, 0, 0, null);
+			v.setFont(f);
 			v.dispose();
 		}
 	}
@@ -591,8 +596,10 @@ public class ClockGUI extends JFrame {
 			checkStudentBuffer();
 			if (changingPanel.getWidth() > 0
 					&& changingPanel.getHeight() > 0
-					&& (infoBuffer == null || infoBuffer.getWidth() != changingPanel
-							.getWidth())) {
+					&& (infoBuffer == null
+							|| infoBuffer.getWidth() != changingPanel
+									.getWidth() || infoBuffer.getHeight() != changingPanel
+							.getHeight())) {
 				if (infoBuffer != null) {
 					infoBuffer.flush();
 				}
