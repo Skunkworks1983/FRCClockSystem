@@ -11,4 +11,8 @@ public class Configuration {
 	public static final int MUG_CENTRAL_WIDTH = MUG_WIDTH;
 	public static final long CACHE_EXIPRY_TIME = 1000 * 60 * 60 * 3; // 3 hours
 	public static final int CENTER_WIDTH = 200;
+
+	public static final long SCREENSAVER_START_TIME = 30000;
+	public static final long SCREENSAVER_IMG_TIME = 10000;
+	public static final int NAME_LENGTH = 20;
 }

@@ -15,9 +15,12 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +44,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import com.skunk.clock.Configuration;
+import com.skunk.clock.CreateMugs;
 import com.skunk.clock.Util;
 import com.skunk.clock.db.ClocktimeDatabase;
 import com.skunk.clock.db.Member;
@@ -66,6 +70,10 @@ public class ClockGUI extends JFrame {
 	private JScrollBar studentScroll, mentorScroll;
 	private JPanel mentorPanel, studentPanel, changingPanel, entryPanel,
 			controlPanel;
+
+	private BufferedImage currentScreensaver;
+	private BufferedImage nextScreensaver;
+	private Thread nextScreensaverLoader;
 
 	/**
 	 * A cached list of all clocked-in members, to speed up the rendering
@@ -108,6 +116,20 @@ public class ClockGUI extends JFrame {
 	 * The clock in/out state of the currently displaying member.
 	 */
 	private boolean lastMemberClockState;
+	/**
+	 * The last time there was an action on the frame.
+	 */
+	private long lastFrameAction = System.currentTimeMillis();
+	/**
+	 * The last time the screensaver frame was updated.
+	 */
+	private long lastScreensaverFrame = 0;
+	/**
+	 * If the frame currently shows the screensaver.
+	 */
+	private AtomicBoolean isScreensaver = new AtomicBoolean(false);
+
+	private File[] screensaverFiles;
 
 	/**
 	 * Creates the Clock GUI, creates the components, adds them, and registers
@@ -133,6 +155,8 @@ public class ClockGUI extends JFrame {
 				dirty.set(true);
 			}
 		});
+
+		screensaverFiles = new File("data/screensaver").listFiles();
 
 		// Create the content pane.
 		contentPane = new JPanel();
@@ -176,6 +200,7 @@ public class ClockGUI extends JFrame {
 		// Creates the entry field for student UUIDs, adds a listener to process
 		// entry events, and also one to ensure it doens't lose focus.
 		uuidEntryField = new JTextField();
+		
 		entryPanel.add(uuidEntryField);
 		uuidEntryField.addActionListener(new ActionListener() {
 			@Override
@@ -185,6 +210,11 @@ public class ClockGUI extends JFrame {
 				lblEntryError.setText(info[1]);
 				lblEntryError.setToolTipText(info[2]);
 				uuidEntryField.setText("");
+			}
+		});
+		uuidEntryField.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				lastFrameAction = System.currentTimeMillis();
 			}
 		});
 		uuidEntryField.setColumns(10);
@@ -226,6 +256,11 @@ public class ClockGUI extends JFrame {
 			}
 		});
 		mentorPanel.add(mentorScroll, BorderLayout.EAST);
+
+		tryLoadNextScreensaver();
+
+		lastFrameAction = System.currentTimeMillis();
+		repaint();
 	}
 
 	/**
@@ -236,10 +271,19 @@ public class ClockGUI extends JFrame {
 	public void validate() {
 		mentorPanel.setPreferredSize(new Dimension(
 				(getWidth() - Configuration.CENTER_WIDTH) / 3, getHeight()));
-		controlPanel.setMaximumSize(new Dimension(Configuration.CENTER_WIDTH, getHeight()));
-		studentPanel.setPreferredSize(new Dimension(
-				2 * (getWidth() - Configuration.CENTER_WIDTH) / 3, getHeight()));
+		controlPanel.setMaximumSize(new Dimension(Configuration.CENTER_WIDTH,
+				getHeight()));
+		studentPanel
+				.setPreferredSize(new Dimension(
+						2 * (getWidth() - Configuration.CENTER_WIDTH) / 3,
+						getHeight()));
 		super.validate();
+	}
+
+	@Override
+	public void repaint() {
+		super.repaint();
+		dirty.set(true);
 	}
 
 	/**
@@ -498,6 +542,31 @@ public class ClockGUI extends JFrame {
 	}
 
 	/**
+	 * Creates a thread to load the next screensaver image, if one doesn't
+	 * exist.
+	 */
+	private void tryLoadNextScreensaver() {
+		if (nextScreensaverLoader == null || !nextScreensaverLoader.isAlive()) {
+			nextScreensaverLoader = new Thread(new Runnable() {
+				public void run() {
+					try {
+						File f = screensaverFiles[(int) (Math.random() * screensaverFiles.length)];
+						BufferedImage img = ImageIO.read(f);
+						System.out.println("SS: " + f.getName());
+						nextScreensaver = img;
+						if (currentScreensaver == null) {
+							currentScreensaver = nextScreensaver;
+							nextScreensaver = null;
+						}
+					} catch (IOException e) {
+					}
+				}
+			});
+			nextScreensaverLoader.start();
+		}
+	}
+
+	/**
 	 * Call this method quickly, at least once a second, to actually paint the
 	 * queued repaints.
 	 */
@@ -506,11 +575,39 @@ public class ClockGUI extends JFrame {
 			if (dirty.getAndSet(false)) {
 				repaintClocked();
 				repaintControlPanel();
+				uuidEntryField.getCaret().setVisible(true);
+			} else if (lastFrameAction + Configuration.SCREENSAVER_START_TIME < System
+					.currentTimeMillis() && screensaverFiles.length > 0) {
+				if (uuidEntryField.getCaret().isVisible()) {
+					//We have a caret.  Hide it and wait awhile.
+					uuidEntryField.getCaret().setVisible(false);
+					try {
+						Thread.sleep(10L);
+					} catch (InterruptedException e) {
+					}
+				}
+				isScreensaver.set(true);
+				if (lastScreensaverFrame + Configuration.SCREENSAVER_IMG_TIME < System
+						.currentTimeMillis()) {
+					lastScreensaverFrame = System.currentTimeMillis();
+					if (currentScreensaver != null) {
+						getGraphics().drawImage(currentScreensaver, 0, 0,
+								getWidth(), getHeight(), null);
+					}
+					currentScreensaver = nextScreensaver;
+					nextScreensaver = null;
+					tryLoadNextScreensaver();
+				}
+				return;
 			} else if (lastMemberClockedTime < System.currentTimeMillis()
 					- Configuration.CLOCKIN_DISPLAY_TIME - 10
 					|| lastMemberClockedTime < System.currentTimeMillis()
 							- Configuration.CLOCK_UPDATE_TIME) {
 				repaintControlPanel();
+			}
+			if (isScreensaver.getAndSet(false)) {
+				getGraphics().clearRect(0, 0, getWidth(), getHeight());
+				repaint();
 			}
 		}
 	}
@@ -651,15 +748,21 @@ public class ClockGUI extends JFrame {
 				}
 			}
 
+			System.out.println("Checking user images...");
+			try {
+				CreateMugs.run(memDB);
+			} catch (IOException e1) {
+			}
+
 			System.out.println("Loading user images...");
 			int i = 0;
 			for (Member m : memDB) {
 				try {
 					loadUserProfile(m);
-					System.out.println("Loaded image for " + m.getName()
+				} catch (IOException e) {
+					System.out.println("Failed to load image for " + m.getName()
 							+ " -> " + m.getIMG() + "\t(" + (i++) + "/"
 							+ memDB.size());
-				} catch (IOException e) {
 				}
 			}
 		}

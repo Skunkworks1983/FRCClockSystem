@@ -3,11 +3,8 @@ package com.skunk.clock;
 import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -41,7 +38,7 @@ public class Main {
 		}
 
 		try {
-			System.setOut(new PrintStream(new FileOutputStream(new File("log"))));
+		//	System.setOut(new PrintStream(new FileOutputStream(new File("log"))));
 		} catch (Exception e) {
 		}
 		final ClockGUI frame = new ClockGUI();
