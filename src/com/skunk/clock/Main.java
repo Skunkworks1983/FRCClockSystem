@@ -3,8 +3,11 @@ package com.skunk.clock;
 import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -38,9 +41,10 @@ public class Main {
 		}
 
 		try {
-		//	System.setOut(new PrintStream(new FileOutputStream(new File("log"))));
+			System.setOut(new PrintStream(new FileOutputStream(new File("log"))));
 		} catch (Exception e) {
 		}
+		Configuration.load(new File("data/config.txt"));
 		final ClockGUI frame = new ClockGUI();
 		if (size != null) {
 			frame.setSize(size);
@@ -64,7 +68,7 @@ public class Main {
 	 * to the program to clock in and out.
 	 * 
 	 * @param frame
-	 *            the frame to work with.          
+	 *            the frame to work with.
 	 */
 	@SuppressWarnings("unused")
 	private static void createCreepyServer(final ClockGUI frame) {
