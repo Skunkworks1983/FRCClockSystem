@@ -157,6 +157,9 @@ public class ClockGUI extends JFrame {
 		});
 
 		screensaverFiles = new File("data/screensaver").listFiles();
+		if (screensaverFiles == null) {
+			screensaverFiles = new File[0];
+		}
 
 		// Create the content pane.
 		contentPane = new JPanel();
@@ -200,7 +203,7 @@ public class ClockGUI extends JFrame {
 		// Creates the entry field for student UUIDs, adds a listener to process
 		// entry events, and also one to ensure it doens't lose focus.
 		uuidEntryField = new JTextField();
-		
+
 		entryPanel.add(uuidEntryField);
 		uuidEntryField.addActionListener(new ActionListener() {
 			@Override
@@ -579,7 +582,7 @@ public class ClockGUI extends JFrame {
 			} else if (lastFrameAction + Configuration.SCREENSAVER_START_TIME < System
 					.currentTimeMillis() && screensaverFiles.length > 0) {
 				if (uuidEntryField.getCaret().isVisible()) {
-					//We have a caret.  Hide it and wait awhile.
+					// We have a caret. Hide it and wait awhile.
 					uuidEntryField.getCaret().setVisible(false);
 					try {
 						Thread.sleep(10L);
@@ -760,9 +763,9 @@ public class ClockGUI extends JFrame {
 				try {
 					loadUserProfile(m);
 				} catch (IOException e) {
-					System.out.println("Failed to load image for " + m.getName()
-							+ " -> " + m.getIMG() + "\t(" + (i++) + "/"
-							+ memDB.size());
+					System.out.println("Failed to load image for "
+							+ m.getName() + " -> " + m.getIMG() + "\t(" + (i++)
+							+ "/" + memDB.size());
 				}
 			}
 		}
