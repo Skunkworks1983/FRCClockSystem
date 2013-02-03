@@ -23,6 +23,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -156,7 +157,18 @@ public class ClockGUI extends JFrame {
 			}
 		});
 
-		screensaverFiles = new File("data/screensaver").listFiles();
+		screensaverFiles = new File("data/screensaver")
+				.listFiles(new FileFilter() {
+					@Override
+					public boolean accept(File file) {
+						String name = file.getName();
+						return file.isFile()
+								&& (name.endsWith(".jpeg")
+										|| name.endsWith(".png")
+										|| name.endsWith(".jpg") || name
+											.endsWith(".gif"));
+					}
+				});
 		if (screensaverFiles == null) {
 			screensaverFiles = new File[0];
 		}
@@ -549,7 +561,9 @@ public class ClockGUI extends JFrame {
 	 * exist.
 	 */
 	private void tryLoadNextScreensaver() {
-		if (nextScreensaverLoader == null || !nextScreensaverLoader.isAlive()) {
+		if (screensaverFiles.length > 0
+				&& (nextScreensaverLoader == null || !nextScreensaverLoader
+						.isAlive())) {
 			nextScreensaverLoader = new Thread(new Runnable() {
 				public void run() {
 					try {
