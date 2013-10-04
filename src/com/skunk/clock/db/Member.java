@@ -22,7 +22,7 @@ public class Member {
 	}
 
 	public static enum MemberGroup {
-		SYSTEMS, PROGRAMMING, BUILD, MARKETING, ELECTRICAL, MENTOR, DESIGN, SAFETY, LEAD, UNDEFINED;
+		SYSTEMS, PROGRAMMING, BUILD, MARKETING, ELECTRICAL, MENTOR, DESIGN, SAFETY, LEAD, SUBLEAD, DATA, OUTREACH, UNDEFINED;
 		public String formattedName() {
 			return name().toUpperCase().substring(0, 1)
 					+ name().toLowerCase().substring(1);
@@ -30,8 +30,8 @@ public class Member {
 
 		public static MemberGroup matchGroup(String s) {
 			for (MemberGroup g : values()) {
-				if (g.name().contains(s.toUpperCase())
-						|| s.toUpperCase().contains(g.name())) {
+				if (g.name().equalsIgnoreCase(s.toUpperCase())
+						|| s.toUpperCase().equalsIgnoreCase(g.name())) {
 					return g;
 				}
 			}

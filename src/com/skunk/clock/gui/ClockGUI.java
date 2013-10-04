@@ -27,6 +27,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -352,6 +353,15 @@ public class ClockGUI extends JFrame {
 			} else {
 				if (m.isInGroup(MemberGroup.LEAD)) {
 					clockedIn.add(0, m);
+				} else if (m.isInGroup(MemberGroup.SUBLEAD)) {
+					// Find the last lead; after that
+					int i = 0;
+					for (i = 0; i < clockedIn.size(); i++) {
+						if (!clockedIn.get(i).isInGroup(MemberGroup.LEAD)) {
+							break;
+						}
+					}
+					clockedIn.add(i, m);
 				} else {
 					clockedIn.add(m);
 				}
@@ -780,6 +790,16 @@ public class ClockGUI extends JFrame {
 				if (clockDB.getClocktime(m).isClockedIn()) {
 					if (m.isInGroup(MemberGroup.LEAD)) {
 						clockedIn.add(0, m);
+					} else if (m.isInGroup(MemberGroup.SUBLEAD)) {
+						// Find the last lead; after that
+						int i = 0;
+						for (i = 0; i < clockedIn.size(); i++) {
+							if (!clockedIn.get(i).isInGroup(MemberGroup.LEAD)) {
+								break;
+							}
+						}
+						System.out.println("SUBLEAD @ " + i + " of " + Arrays.toString(clockedIn.toArray()));
+						clockedIn.add(i, m);
 					} else {
 						clockedIn.add(m);
 					}

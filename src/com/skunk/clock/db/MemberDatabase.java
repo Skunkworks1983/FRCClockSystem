@@ -63,6 +63,9 @@ public class MemberDatabase implements Iterable<Member> {
 									+ " ");
 				}
 				String[] sGroups = chunks[3].split(" ");
+				if (sGroups.length == 1 && sGroups[0].trim().length() == 0) {
+					sGroups = new String[0];
+				}
 				MemberGroup[] groups = new MemberGroup[sGroups.length];
 				try {
 					for (int i = 0; i < sGroups.length; i++) {
