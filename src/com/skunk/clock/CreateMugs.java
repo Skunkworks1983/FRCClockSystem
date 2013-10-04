@@ -24,10 +24,10 @@ public class CreateMugs {
 	public static void run(MemberDatabase memDB) throws IOException {
 		int i = 0;
 		for (Member m : memDB) {
-			BufferedImage img = create(
-					new File("data/mugs_large/" + m.getIMG()), m.getName());
 			File dest = new File("data/mugs/" + m.getIMG());
 			if (!dest.exists()) {
+				BufferedImage img = create(
+						new File("data/mugs_large/" + m.getIMG()), m.getName());
 				ImageIO.write(img, "JPG", dest);
 				System.out.println("Processed image for " + m.getName()
 						+ " -> " + m.getIMG() + "\t(" + (i++) + "/"

@@ -238,6 +238,7 @@ public class ClocktimeDatabase {
 			} catch (Exception e) {
 				System.out
 						.println("...but the cached state has an invalid timestamp.");
+				timeStamp = -1;
 			}
 			while (timeStamp != -1) {
 				String s = reader.readLine();

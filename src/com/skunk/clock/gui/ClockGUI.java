@@ -608,8 +608,29 @@ public class ClockGUI extends JFrame {
 						.currentTimeMillis()) {
 					lastScreensaverFrame = System.currentTimeMillis();
 					if (currentScreensaver != null) {
-						getGraphics().drawImage(currentScreensaver, 0, 0,
-								getWidth(), getHeight(), null);
+						// getGraphics().drawImage(currentScreensaver, 0, 0,
+						// getWidth(), getHeight(), null);
+						getGraphics().clearRect(0, 0, getWidth(), getHeight());
+						float aspect = (((float) currentScreensaver
+								.getWidth(null)) / ((float) currentScreensaver
+								.getHeight(null)));
+						if (aspect * getHeight() > getWidth()) {
+							int height = (int) (((float) getWidth()) / aspect);
+							getGraphics().drawImage(currentScreensaver, 0,
+									(getHeight() / 2) - (height / 2),
+									getWidth(),
+									(getHeight() / 2) + (height / 2), 0, 0,
+									currentScreensaver.getWidth(null),
+									currentScreensaver.getHeight(null), null);
+						} else {
+							int width = (int) (aspect * ((float) getHeight()));
+							getGraphics().drawImage(currentScreensaver,
+									(getWidth() / 2) - (width / 2), 0,
+									(getWidth() / 2) + (width / 2),
+									getHeight(), 0, 0,
+									currentScreensaver.getWidth(null),
+									currentScreensaver.getHeight(null), null);
+						}
 					}
 					currentScreensaver = nextScreensaver;
 					nextScreensaver = null;
