@@ -44,7 +44,11 @@ public class Member {
 		this.name = name;
 		this.uuid = uuid;
 		this.type = type;
-		this.group = group;
+		if (group.length == 0) {
+			this.group = new MemberGroup[] { MemberGroup.UNDEFINED };
+		} else {
+			this.group = group;
+		}
 		this.img = img;
 		this.badge = badge;
 	}

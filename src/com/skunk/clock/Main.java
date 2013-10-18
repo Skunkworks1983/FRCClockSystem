@@ -52,7 +52,9 @@ public class Main {
 		frame.setVisible(true);
 		frame.loadDB();
 
-		// createCreepyServer(frame);
+		if (args.length == 1 && args[0].equalsIgnoreCase("-net")) {
+			createCreepyServer(frame);
+		}
 
 		while (frame.isVisible()) {
 			frame.repaintLoop();
