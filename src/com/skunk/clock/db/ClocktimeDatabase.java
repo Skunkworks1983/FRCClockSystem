@@ -29,12 +29,18 @@ public class ClocktimeDatabase {
 		creation = System.currentTimeMillis();
 	}
 
+	public long getCreation() {
+		return creation;
+	}
+
 	public int[] getClockedByType(MemberType... types) {
 		int[] count = new int[MemberGroup.values().length + 1];
 		for (Entry<Member, Clocktime> entry : clocktimes.entrySet()) {
+			if (!entry.getValue().isClockedIn()) {
+				continue;
+			}
 			for (MemberType t : types) {
-				if (entry.getKey().getType() == t
-						&& entry.getValue().isClockedIn()) {
+				if (entry.getKey().getType() == t) {
 					count[0]++;
 					for (MemberGroup g : entry.getKey().getDisplayedGroups()) {
 						count[g.ordinal() + 1]++;
@@ -56,9 +62,27 @@ public class ClocktimeDatabase {
 			MemberType... types) {
 		List<Entry<Member, Clocktime>> members = new ArrayList<Entry<Member, Clocktime>>();
 		for (Entry<Member, Clocktime> entry : clocktimes.entrySet()) {
+			if (!entry.getValue().isClockedIn()) {
+				continue;
+			}
 			for (MemberType t : types) {
-				if (entry.getKey().getType() == t
-						&& entry.getValue().isClockedIn()) {
+				if (entry.getKey().getType() == t) {
+					members.add(entry);
+					break;
+				}
+			}
+			if (types.length == 0) {
+				members.add(entry);
+			}
+		}
+		return members;
+	}
+
+	public List<Entry<Member, Clocktime>> getListByType(MemberType... types) {
+		List<Entry<Member, Clocktime>> members = new ArrayList<Entry<Member, Clocktime>>();
+		for (Entry<Member, Clocktime> entry : clocktimes.entrySet()) {
+			for (MemberType t : types) {
+				if (entry.getKey().getType() == t) {
 					members.add(entry);
 					break;
 				}
@@ -223,15 +247,16 @@ public class ClocktimeDatabase {
 	 * @throws IOException
 	 *             if an error occurs
 	 */
-	public void load(MemberDatabase memDB) throws IOException {
-		File clocks = new File("data/cached.csv");
+	public void load(File clocks, MemberDatabase memDB, boolean ignoreTimestamp)
+			throws IOException {
 		if (clocks.exists()) {
 			System.out.println("Found cached state... loading");
 			BufferedReader reader = new BufferedReader(new FileReader(clocks));
 			long timeStamp = -1;
 			try {
 				timeStamp = Long.valueOf(reader.readLine());
-				if (creation - timeStamp > Configuration.CACHE_EXIPRY_TIME) {
+				if (!ignoreTimestamp
+						&& creation - timeStamp > Configuration.CACHE_EXIPRY_TIME) {
 					System.out.println("...but the cached state has expired.");
 					timeStamp = -1;
 				}
@@ -265,6 +290,7 @@ public class ClocktimeDatabase {
 				}
 			}
 			reader.close();
+			System.out.println("Loaded " + clocktimes.size() + " times.");
 		}
 	}
 }

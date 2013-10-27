@@ -344,10 +344,9 @@ public class ClockGUI extends JFrame {
 							.showInputDialog("Enter the time offset in hours.");
 					try {
 						float hours = Float.valueOf(offset);
-						clockDB.getClocktime(modUser)
-								.adminClockIn(
-										System.currentTimeMillis()
-												- (long) (hours * 60f * 60f * 1000f));
+						clockDB.getClocktime(modUser).adminClockIn(
+								System.currentTimeMillis()
+										- (long) (hours * 60f * 60f * 1000f));
 						if (interact) {
 							lastMember = modUser;
 							lastMemberClockedTime = System.currentTimeMillis()
@@ -818,7 +817,7 @@ public class ClockGUI extends JFrame {
 			}
 			System.out.println("Checking for recovery image...");
 			try {
-				clockDB.load(memDB);
+				clockDB.load(new File("data/cached.csv"), memDB, false);
 			} catch (IOException e) {
 			}
 

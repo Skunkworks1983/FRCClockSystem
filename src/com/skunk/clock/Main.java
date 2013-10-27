@@ -17,6 +17,7 @@ import com.skunk.clock.db.Clocktime;
 import com.skunk.clock.db.Member;
 import com.skunk.clock.db.Member.MemberType;
 import com.skunk.clock.gui.ClockGUI;
+import com.skunk.clock.web.ClockWebServer;
 
 /**
  * @author westin
@@ -27,6 +28,8 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		Dimension size = null;
+		boolean runSketchyServer = false;
+		boolean runWebServer = false;
 		for (String s : args) {
 			if (s.startsWith("size=")) {
 				String[] chunks = s.substring(5).split("x");
@@ -37,6 +40,12 @@ public class Main {
 					} catch (Exception e) {
 					}
 				}
+			}
+			if (s.equalsIgnoreCase("-net")) {
+				runSketchyServer = true;
+			}
+			if (s.equalsIgnoreCase("-web")) {
+				runWebServer = true;
 			}
 		}
 
@@ -52,8 +61,20 @@ public class Main {
 		frame.setVisible(true);
 		frame.loadDB();
 
-		if (args.length >= 1 && args[0].equalsIgnoreCase("-net")) {
+		if (runSketchyServer) {
 			createCreepyServer(frame);
+		}
+
+		if (runWebServer) {
+			new Thread() {
+				public void run() {
+					try {
+						ClockWebServer.main(new String[0]);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}.run();
 		}
 
 		while (frame.isVisible()) {

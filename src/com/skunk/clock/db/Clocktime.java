@@ -17,7 +17,7 @@ public class Clocktime {
 	/**
 	 * This object should only be created by the clocktime database.
 	 */
-	Clocktime() {
+	public Clocktime() {
 	}
 
 	/**
@@ -145,7 +145,13 @@ public class Clocktime {
 	 * @param end
 	 *            the end time
 	 */
-	void insertClockTime(long start, long end) {
+	public void insertClockTime(long start, long end) {
 		times.add(new SimpleEntry<Long, Long>(start, end));
+	}
+
+	public void insertClockTime(Clocktime db) {
+		for (Entry<Long, Long> tt : db.times) {
+			times.add(tt);
+		}
 	}
 }
