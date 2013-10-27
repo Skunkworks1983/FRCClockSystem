@@ -36,6 +36,17 @@ public class Clocktime {
 	}
 
 	/**
+	 * Clocks this object in at the given time.
+	 */
+	public void adminClockIn(long time) {
+		if (isClockedIn()) {
+			times.set(times.size() - 1, new SimpleEntry<Long, Long>(time, time));
+		} else {
+			times.add(new SimpleEntry<Long, Long>(time, time));
+		}
+	}
+
+	/**
 	 * Clocks this object out at the current time, increasing the missing badge
 	 * count by one if they didn't have a badge.
 	 * 

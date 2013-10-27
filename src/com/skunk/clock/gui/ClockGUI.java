@@ -324,57 +324,93 @@ public class ClockGUI extends JFrame {
 			if (m == null) {
 				throw new NullPointerException();
 			}
-			if (clockedIn.contains(m)) {
-				clockedIn.remove(m);
-				clockDB.getClocktime(m).clockOut(hadBadge);
-				if (m.getType() == MemberType.COACH) {
-					if (!interact) {
-						errors[1] = "Coaches can't sign out through terminal...";
-						return errors;
-					}
-					if (JOptionPane.showConfirmDialog(this,
-							"Do you wish to check all members out?",
-							"Coach Clocking Out...", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-						clockedIn.clear();
-						clockDB.clockOutAllWith(60 * 60 * 1000);
-						clockedIn.clear();
-						try {
-							clockDB.save();
-						} catch (IOException e1) {
-							JOptionPane.showMessageDialog(null, e1.toString());
-						}
+			if (m.getType() == MemberType.ADMIN) {
+				if (!interact) {
+					errors[1] = "Admins can't manipulate times through the terminal.";
+					return errors;
+				}
+				String modUserID = JOptionPane
+						.showInputDialog("Enter the user to modify.");
+				Member modUser = memDB.getMemberByBadge(user);
+				if (modUser == null) {
+					try {
+						modUser = memDB
+								.getMemberByUUID(Long.valueOf(modUserID));
+					} catch (Exception e) {
 					}
 				}
-				if (interact) {
-					lastMemberClockState = false;
-				} else {
-					errors[0] = m.toString() + " checked out";
+				if (modUser != null) {
+					String offset = JOptionPane
+							.showInputDialog("Enter the time offset in hours.");
+					try {
+						float hours = Float.valueOf(offset);
+						clockDB.getClocktime(modUser)
+								.adminClockIn(
+										System.currentTimeMillis()
+												- (long) (hours * 60f * 60f * 1000f));
+						if (interact) {
+							lastMember = modUser;
+							lastMemberClockedTime = System.currentTimeMillis()
+									- (long) (hours * 24f * 60f * 60f * 1000f);
+						}
+					} catch (Exception e) {
+					}
 				}
 			} else {
-				if (m.isInGroup(MemberGroup.LEAD)) {
-					clockedIn.add(0, m);
-				} else if (m.isInGroup(MemberGroup.SUBLEAD)) {
-					// Find the last lead; after that
-					int i = 0;
-					for (i = 0; i < clockedIn.size(); i++) {
-						if (!clockedIn.get(i).isInGroup(MemberGroup.LEAD)) {
-							break;
+				if (clockedIn.contains(m)) {
+					clockedIn.remove(m);
+					clockDB.getClocktime(m).clockOut(hadBadge);
+					if (m.getType() == MemberType.COACH) {
+						if (!interact) {
+							errors[1] = "Coaches can't sign out through terminal...";
+							return errors;
+						}
+						if (JOptionPane.showConfirmDialog(this,
+								"Do you wish to check all members out?",
+								"Coach Clocking Out...",
+								JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+							clockedIn.clear();
+							clockDB.clockOutAllWith(60 * 60 * 1000);
+							clockedIn.clear();
+							try {
+								clockDB.save();
+							} catch (IOException e1) {
+								JOptionPane.showMessageDialog(null,
+										e1.toString());
+							}
 						}
 					}
-					clockedIn.add(i, m);
+					if (interact) {
+						lastMemberClockState = false;
+					} else {
+						errors[0] = m.toString() + " checked out";
+					}
 				} else {
-					clockedIn.add(m);
+					if (m.isInGroup(MemberGroup.LEAD)) {
+						clockedIn.add(0, m);
+					} else if (m.isInGroup(MemberGroup.SUBLEAD)) {
+						// Find the last lead; after that
+						int i = 0;
+						for (i = 0; i < clockedIn.size(); i++) {
+							if (!clockedIn.get(i).isInGroup(MemberGroup.LEAD)) {
+								break;
+							}
+						}
+						clockedIn.add(i, m);
+					} else {
+						clockedIn.add(m);
+					}
+					clockDB.getClocktime(m).clockIn(hadBadge);
+					if (interact) {
+						lastMemberClockState = true;
+					} else {
+						errors[0] = m.toString() + " checked in";
+					}
 				}
-				clockDB.getClocktime(m).clockIn(hadBadge);
 				if (interact) {
-					lastMemberClockState = true;
-				} else {
-					errors[0] = m.toString() + " checked in";
+					lastMember = m;
+					lastMemberClockedTime = System.currentTimeMillis();
 				}
-			}
-			if (interact) {
-				lastMember = m;
-				lastMemberClockedTime = System.currentTimeMillis();
 			}
 			checkBuffers();
 			try {
@@ -388,6 +424,7 @@ public class ClockGUI extends JFrame {
 			errors[1] = "NaM: " + user;
 			errors[2] = "Not a member!";
 		}
+		uuidEntryField.requestFocus();
 		return errors;
 	}
 
@@ -798,7 +835,8 @@ public class ClockGUI extends JFrame {
 								break;
 							}
 						}
-						System.out.println("SUBLEAD @ " + i + " of " + Arrays.toString(clockedIn.toArray()));
+						System.out.println("SUBLEAD @ " + i + " of "
+								+ Arrays.toString(clockedIn.toArray()));
 						clockedIn.add(i, m);
 					} else {
 						clockedIn.add(m);

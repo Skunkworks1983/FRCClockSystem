@@ -52,7 +52,7 @@ public class Main {
 		frame.setVisible(true);
 		frame.loadDB();
 
-		if (args.length == 1 && args[0].equalsIgnoreCase("-net")) {
+		if (args.length >= 1 && args[0].equalsIgnoreCase("-net")) {
 			createCreepyServer(frame);
 		}
 
@@ -72,7 +72,6 @@ public class Main {
 	 * @param frame
 	 *            the frame to work with.
 	 */
-	@SuppressWarnings("unused")
 	private static void createCreepyServer(final ClockGUI frame) {
 		new Thread(new Runnable() {
 			@Override

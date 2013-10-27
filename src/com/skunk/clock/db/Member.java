@@ -14,7 +14,7 @@ public class Member {
 	private final String badge, img;
 
 	public static enum MemberType {
-		STUDENT, MENTOR, COACH;
+		STUDENT, MENTOR, COACH, ADMIN;
 		public String formattedName() {
 			return name().toUpperCase().substring(0, 1)
 					+ name().toLowerCase().substring(1);
