@@ -87,6 +87,10 @@ public class VisualizePeriodContainer implements Container {
 					ClocktimeDatabase db = server.getDatabase().getClocktime(
 							f.getAbsolutePath());
 					for (Entry<Member, Clocktime> entry : db.getListByType()) {
+						if (entry.getValue().getClockTime() <= 0
+								&& !data.containsKey("all")) {
+							continue;
+						}
 						Clocktime supp = totalData.get(entry.getKey());
 						if (supp == null) {
 							supp = new Clocktime();

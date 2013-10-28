@@ -46,6 +46,10 @@ public class VisualizeDayContainer implements Container {
 								.getListByType();
 						body.println("<table border=1>");
 						for (Entry<Member, Clocktime> entry : studentList) {
+							if (entry.getValue().getClockTime() <= 0
+									&& !data.containsKey("all")) {
+								continue;
+							}
 							body.println("<tr><td>"
 									+ entry.getKey().getName()
 									+ "</td><td>"

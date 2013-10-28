@@ -15,10 +15,14 @@ public class WebUtil {
 			String info = target.substring(target.indexOf('?') + 1);
 			String[] parts = info.split("&");
 			for (int i = 0; i < parts.length; i++) {
-				String[] temp = parts[i].split("=");
+				String[] temp = parts[i].split("=", 2);
 				try {
-					get.put(URLDecoder.decode(temp[0], "UTF-8"),
-							URLDecoder.decode(temp[1], "UTF-8"));
+					if (temp.length == 2) {
+						get.put(URLDecoder.decode(temp[0], "UTF-8"),
+								URLDecoder.decode(temp[1], "UTF-8"));
+					} else {
+						get.put(URLDecoder.decode(temp[0], "UTF-8"), "");
+					}
 				} catch (UnsupportedEncodingException e) {
 				}
 			}
