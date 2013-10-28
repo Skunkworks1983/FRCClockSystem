@@ -347,6 +347,24 @@ public class ClockGUI extends JFrame {
 						clockDB.getClocktime(modUser).adminClockIn(
 								System.currentTimeMillis()
 										- (long) (hours * 60f * 60f * 1000f));
+						if (!clockedIn.contains(modUser)) {
+
+						}
+						if (modUser.isInGroup(MemberGroup.LEAD)) {
+							clockedIn.add(0, modUser);
+						} else if (modUser.isInGroup(MemberGroup.SUBLEAD)) {
+							// Find the last lead; after that
+							int i = 0;
+							for (i = 0; i < clockedIn.size(); i++) {
+								if (!clockedIn.get(i).isInGroup(
+										MemberGroup.LEAD)) {
+									break;
+								}
+							}
+							clockedIn.add(i, modUser);
+						} else {
+							clockedIn.add(modUser);
+						}
 						if (interact) {
 							lastMember = modUser;
 							lastMemberClockedTime = System.currentTimeMillis()

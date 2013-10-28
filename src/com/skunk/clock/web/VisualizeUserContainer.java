@@ -13,6 +13,7 @@ import org.simpleframework.http.core.Container;
 import com.skunk.clock.db.Clocktime;
 import com.skunk.clock.db.ClocktimeDatabase;
 import com.skunk.clock.db.Member;
+import com.skunk.clock.db.Member.MemberGroup;
 
 public class VisualizeUserContainer implements Container {
 	private ClockWebServer server;
@@ -105,24 +106,29 @@ public class VisualizeUserContainer implements Container {
 					}
 				}
 				body.println("<div style='float: left;'>");
-				body.println("<img src='/visual/user/image?uuid=" + uuid + "'/>");
+				body.println("<img src='/visual/user/image?uuid=" + uuid
+						+ "'/>");
 				body.println("</div>");
-				
+
 				body.println("<b>" + mem.getName() + "</b></br>");
-				body.print("In groups: ");
-				for (int j = 0; j < mem.getGroups().length; j++) {
-					if (j == mem.getGroups().length - 1) {
-						if (mem.getGroups().length == 2) {
-							body.print(" and ");
-						} else {
-							body.print(", and ");
+				if (mem.getGroups().length > 0
+						&& mem.getGroups()[0] != MemberGroup.UNDEFINED) {
+					body.print("In groups: ");
+					for (int j = 0; j < mem.getGroups().length; j++) {
+						if (j == mem.getGroups().length - 1) {
+							if (mem.getGroups().length == 2) {
+								body.print(" and ");
+							} else if (mem.getGroups().length > 2) {
+								body.print(", and ");
+							}
+						} else if (j > 0) {
+							body.print(", ");
 						}
-					} else if (j > 0) {
-						body.print(", ");
+						body.print(mem.getGroups()[j].formattedName());
 					}
-					body.print(mem.getGroups()[j].formattedName());
+					body.println("<br>");
 				}
-				body.println();
+				body.println("Type: " + mem.getType().formattedName() + "</br>");
 
 				body.println("<table border=1>");
 				for (int j = 0; j < i; j++) {
