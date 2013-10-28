@@ -22,7 +22,7 @@ import com.skunk.clock.db.Member.MemberType;
 
 public class ClocktimeDatabase {
 	private final Map<Member, Clocktime> clocktimes;
-	private final long creation;
+	private long creation;
 
 	public ClocktimeDatabase() {
 		this.clocktimes = new HashMap<Member, Clocktime>();
@@ -192,6 +192,9 @@ public class ClocktimeDatabase {
 			throws IOException {
 		BufferedWriter writeClocks = new BufferedWriter(new OutputStreamWriter(
 				f));
+		if (creation < 0) {
+			creation = System.currentTimeMillis();
+		}
 		writeClocks.write(String.valueOf(creation));
 		writeClocks.newLine();
 		if (header) {
@@ -259,6 +262,8 @@ public class ClocktimeDatabase {
 						&& creation - timeStamp > Configuration.CACHE_EXIPRY_TIME) {
 					System.out.println("...but the cached state has expired.");
 					timeStamp = -1;
+				} else {
+					creation = timeStamp;
 				}
 			} catch (Exception e) {
 				System.out

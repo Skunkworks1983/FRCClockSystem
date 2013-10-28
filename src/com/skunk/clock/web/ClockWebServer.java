@@ -28,7 +28,9 @@ public class ClockWebServer implements Container {
 		containers.put("visual/day", new VisualizeDayContainer(this));
 		containers.put("visual/period", new VisualizePeriodContainer(this));
 		containers.put("visual/user", new VisualizeUserContainer(this));
+		containers.put("graph/user", new GraphUserContainer(this));
 		containers.put("visual/user/image", new GetUserImage(this));
+		containers.put("data/resources/*", new ResourceContainer());
 		db = new DatabaseController();
 	}
 
@@ -47,6 +49,17 @@ public class ClockWebServer implements Container {
 		try {
 			obj = containers.get(URLDecoder.decode(targetClean.trim(), "UTF-8")
 					.toLowerCase());
+			if (obj == null) {
+				String tmp = targetClean;
+				while (tmp.contains("/") && obj == null) {
+					tmp = tmp.substring(0, tmp.lastIndexOf('/'));
+					obj = containers.get(URLDecoder.decode(tmp.trim(), "UTF-8")
+							.toLowerCase() + "/*");
+				}
+				if (obj != null) {
+					targetClean = tmp;
+				}
+			}
 			System.out.println("Request: "
 					+ request.getTarget()
 					+ " ("
