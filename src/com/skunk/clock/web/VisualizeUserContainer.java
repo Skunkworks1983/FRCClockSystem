@@ -3,7 +3,9 @@ package com.skunk.clock.web;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Map;
 
 import org.simpleframework.http.Request;
@@ -92,19 +94,29 @@ public class VisualizeUserContainer implements Container {
 								return false;
 							}
 						});
-				long[] timeHeaders = new long[list.length];
-				long[] clockTime = new long[list.length];
+				long[][] timeHeaders = new long[list.length][2];
 				int i = 0;
 				for (File f : list) {
 					ClocktimeDatabase db = server.getDatabase().getClocktime(
 							f.getAbsolutePath());
 					Clocktime info = db.getClocktime(mem);
 					if (info != null) {
-						timeHeaders[i] = db.getCreation();
-						clockTime[i] = info.getClockTime();
+						timeHeaders[i][0] = db.getCreation();
+						timeHeaders[i][1] = info.getClockTime();
+						i++;
+					} else {
+						timeHeaders[i][0] = Long.MAX_VALUE;
 						i++;
 					}
 				}
+
+				Arrays.sort(timeHeaders, new Comparator<long[]>() {
+					@Override
+					public int compare(long[] o1, long[] o2) {
+						return Long.compare(o1[0], o2[0]);
+					}
+				});
+				
 				body.println("<div style='float: left;'>");
 				body.println("<img src='/visual/user/image?uuid=" + uuid
 						+ "'/>");
@@ -133,8 +145,8 @@ public class VisualizeUserContainer implements Container {
 				body.println("<table border=1>");
 				for (int j = 0; j < i; j++) {
 					body.println("<tr><td>"
-							+ WebUtil.formatDate(timeHeaders[j]) + "</td><td>"
-							+ WebUtil.formatTimeLong(clockTime[j])
+							+ WebUtil.formatDate(timeHeaders[j][0]) + "</td><td>"
+							+ WebUtil.formatTimeLong(timeHeaders[j][1])
 							+ "</td></tr>");
 				}
 				body.println("</table>");

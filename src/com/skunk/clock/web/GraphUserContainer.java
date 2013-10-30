@@ -106,12 +106,15 @@ public class GraphUserContainer implements Container {
 						timeHeaders[i][0] = db.getCreation();
 						timeHeaders[i][1] = info.getClockTime();
 						i++;
+					} else {
+						timeHeaders[i][0] = Long.MAX_VALUE;
+						i++;
 					}
 				}
 				Arrays.sort(timeHeaders, new Comparator<long[]>() {
 					@Override
 					public int compare(long[] o1, long[] o2) {
-						return (int) (o1[0] - o2[0]);
+						return Long.compare(o1[0], o2[0]);
 					}
 				});
 
