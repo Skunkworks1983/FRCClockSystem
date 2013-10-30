@@ -259,7 +259,7 @@ public class ClocktimeDatabase {
 			try {
 				timeStamp = Long.valueOf(reader.readLine());
 				if (!ignoreTimestamp
-						&& creation - timeStamp > Configuration.CACHE_EXIPRY_TIME) {
+						&& System.currentTimeMillis() - timeStamp > Configuration.CACHE_EXIPRY_TIME) {
 					System.out.println("...but the cached state has expired.");
 					timeStamp = -1;
 				} else {

@@ -1,11 +1,8 @@
 package com.skunk.clock.web;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Map;
 
 import org.simpleframework.http.Request;
@@ -73,29 +70,7 @@ public class GraphUserContainer implements Container {
 					} catch (Exception e) {
 					}
 				}
-				File[] list = new File("./data")
-						.listFiles(new FilenameFilter() {
-							@Override
-							public boolean accept(File dir, String name) {
-								if (name.startsWith("time_chunk_")) {
-									// Parse as a date
-									String[] dateInfo = name.substring(11,
-											name.length() - 4).split("_");
-									if (dateInfo.length == 3) {
-										Calendar cal = Calendar.getInstance();
-										cal.set(Integer.valueOf(dateInfo[2]),
-												Integer.valueOf(dateInfo[1]) - 1,
-												Integer.valueOf(dateInfo[0]),
-												0, 0, 0);
-										if (cal.getTimeInMillis() >= startTime
-												&& cal.getTimeInMillis() <= endTime) {
-											return true;
-										}
-									}
-								}
-								return false;
-							}
-						});
+				File[] list = WebUtil.listOrderedDatabase(startTime, endTime);
 				long[][] timeHeaders = new long[list.length][2];
 				int i = 0;
 				for (File f : list) {
@@ -111,12 +86,6 @@ public class GraphUserContainer implements Container {
 						i++;
 					}
 				}
-				Arrays.sort(timeHeaders, new Comparator<long[]>() {
-					@Override
-					public int compare(long[] o1, long[] o2) {
-						return Long.compare(o1[0], o2[0]);
-					}
-				});
 
 				body.println("<table id=data>");
 				body.println("<tfoot><tr>");

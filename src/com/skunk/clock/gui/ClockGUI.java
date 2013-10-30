@@ -852,8 +852,6 @@ public class ClockGUI extends JFrame {
 								break;
 							}
 						}
-						System.out.println("SUBLEAD @ " + i + " of "
-								+ Arrays.toString(clockedIn.toArray()));
 						clockedIn.add(i, m);
 					} else {
 						clockedIn.add(m);

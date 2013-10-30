@@ -102,13 +102,20 @@ public class VisualizePeriodContainer implements Container {
 				body.println("From " + WebUtil.formatDate(startTime) + " to "
 						+ WebUtil.formatDate(endTime) + "</br>");
 				if (totalData.size() != 0) {
+					long totalTime = (long) (1000 * 60 * 60 * 2.5f)
+							* list.length;
+					body.println("Days: " + list.length + "</br>");
 					body.println("<table border=1>");
+					body.println("<tr><th>User</th><th>Time</th><th>Percentage</th></tr>");
 					for (Entry<Member, Clocktime> entry : totalData.entrySet()) {
 						body.println("<tr><td>"
 								+ entry.getKey().getName()
 								+ "</td><td>"
 								+ WebUtil.formatTimeLong(entry.getValue()
-										.getClockTime()) + "</td></tr>");
+										.getClockTime())
+								+ "</td><td>"
+								+ WebUtil.formatPercentage(entry.getValue().getClockTime(),
+										totalTime) + "</td></tr>");
 					}
 					body.println("</table>");
 				}
