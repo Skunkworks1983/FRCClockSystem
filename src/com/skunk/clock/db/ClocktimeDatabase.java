@@ -261,6 +261,28 @@ public class ClocktimeDatabase {
 				if (!ignoreTimestamp
 						&& System.currentTimeMillis() - timeStamp > Configuration.CACHE_EXIPRY_TIME) {
 					System.out.println("...but the cached state has expired.");
+					// Move the old cache:
+					{
+						String date = Util.formatDate(new Date(timeStamp));
+						File oldClocks = new File("data/time_chunk_" + date
+								+ ".csv");
+						if (!oldClocks.exists()) {
+							ClocktimeDatabase oldCache = new ClocktimeDatabase();
+							oldCache.load(clocks, memDB, true);
+							FileOutputStream clocksFout = new FileOutputStream(
+									oldClocks);
+							oldCache.clockOutAllWith(1000 * 60 * 60);
+							oldCache.writeRawData(clocksFout, true);
+
+							try {
+								clocksFout.flush();
+								clocksFout.getFD().sync();
+							} catch (SyncFailedException e) {
+								System.out.println(e.getMessage());
+							}
+							clocksFout.close();
+						}
+					}
 					timeStamp = -1;
 				} else {
 					creation = timeStamp;

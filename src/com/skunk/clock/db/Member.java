@@ -53,6 +53,15 @@ public class Member {
 		this.badge = badge;
 	}
 
+	public String getReversedName() {
+		int space = name.indexOf(' ');
+		if (space > 0) {
+			return name.substring(space + 1).concat(name.substring(0, space));
+		} else {
+			return name;
+		}
+	}
+
 	public String getBadge() {
 		return badge;
 	}
