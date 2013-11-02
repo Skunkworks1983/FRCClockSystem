@@ -140,7 +140,7 @@ public class VisualizePeriodContainer extends APIHandler {
 					body.println("Days: " + list.length + "</br>");
 					body.println("<table id='greenTable'>");
 					body.println("<tr>");
-					body.println("<tr><th>User</th><th>Total Time</th><th>Total Percentage</th>");
+					body.println("<tr><th>User</th><th>Total Time</th><th>Total %</th>");
 					if (showParts) {
 						for (Long db : dayData.keySet()) {
 							body.println("<th>" + WebUtil.formatDate(db)
