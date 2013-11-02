@@ -24,7 +24,8 @@ public class ClockWebServer implements Container {
 	}
 
 	private ClockWebServer() {
-		containers.put("", new CurrentDataContainer(this));
+		containers.put("", new NavContainer(this));
+		containers.put("list", new CurrentDataContainer(this));
 		containers.put("visual/day", new VisualizeDayContainer(this));
 		containers.put("visual/period", new VisualizePeriodContainer(this));
 		containers.put("visual/user", new VisualizeUserContainer(this));
@@ -94,10 +95,17 @@ public class ClockWebServer implements Container {
 	}
 
 	public static void main(String[] list) throws Exception {
+		int port = 8080;
+		if (list.length == 1) {
+			try {
+				port = Integer.valueOf(list[0]);
+			} catch (NumberFormatException e) {
+			}
+		}
 		Container container = new ClockWebServer();
 		Server server = new ContainerServer(container);
 		Connection connection = new SocketConnection(server);
-		SocketAddress address = new InetSocketAddress(8080);
+		SocketAddress address = new InetSocketAddress(port);
 		connection.connect(address);
 	}
 }
