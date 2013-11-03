@@ -86,7 +86,7 @@ window.onload = function () {
         var dateRaw = new Date(parseInt(labels[i]));
         var y = Math.round(height - bottomgutter - Y * data[i]),
             x = Math.round(leftgutter + X * (i + .5)),
-            t = r.text(x, height - 6, dateRaw.getMonth() + "/" + (dateRaw.getDate() < 10?"0":"") + dateRaw.getDate()).attr(txt).toBack();
+            t = r.text(x, height - 6, (dateRaw.getMonth()+1) + "/" + (dateRaw.getDate() < 10?"0":"") + dateRaw.getDate()).attr(txt).toBack();
         if (!i) {
             p = ["M", x, y, "C", x, y];
             bgpp = ["M", leftgutter + X * .5, height - bottomgutter, "L", x, y, "C", x, y];
@@ -125,7 +125,7 @@ window.onload = function () {
                 minutes -= hours*60;
                 var date = new Date(parseInt(lbl));
                 label[0].attr({text: hours + "hrs, " + minutes + "mins"}).show().stop().animateWith(frame, anim, {transform: ["t", lx, ly]}, 200 * is_label_visible);
-                label[1].attr({text: date.getMonth() + "/" + (date.getDate() < 10?"0":"") + date.getDate()}).show().stop().animateWith(frame, anim, {transform: ["t", lx, ly]}, 200 * is_label_visible);
+                label[1].attr({text: (date.getMonth()+1) + "/" + (date.getDate() < 10?"0":"") + date.getDate()}).show().stop().animateWith(frame, anim, {transform: ["t", lx, ly]}, 200 * is_label_visible);
                 dot.attr("r", 6);
                 is_label_visible = true;
             }, function () {
