@@ -107,6 +107,7 @@ public class VisualizePeriodContainer extends APIHandler {
 				}
 				boolean showEmpty = data.containsKey("all");
 				boolean showParts = data.containsKey("parts");
+				long totalTime = 0;
 
 				for (File f : list) {
 					ClocktimeDatabase db = server.getDatabase().getClocktime(
@@ -116,6 +117,7 @@ public class VisualizePeriodContainer extends APIHandler {
 					if (showParts) {
 						dayData.put(db.getCreation(), db);
 					}
+					totalTime += db.getRequiredTime();
 					for (Entry<Member, Clocktime> entry : lst) {
 						if (entry.getValue().getClockTime() <= 0 && !showEmpty) {
 							continue;
@@ -135,8 +137,6 @@ public class VisualizePeriodContainer extends APIHandler {
 				body.println("From " + WebUtil.formatDate(startTime) + " to "
 						+ WebUtil.formatDate(endTime) + "</br>");
 				if (totalData.size() != 0) {
-					long totalTime = (long) (1000 * 60 * 60 * 2.5f)
-							* list.length;
 					body.println("Days: " + list.length + "</br>");
 					body.println("<table id='greenTable'>");
 					body.println("<tr>");

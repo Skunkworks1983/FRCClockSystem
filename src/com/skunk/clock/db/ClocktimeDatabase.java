@@ -197,7 +197,7 @@ public class ClocktimeDatabase {
 			creation = System.currentTimeMillis();
 		}
 		writeClocks.write(String.valueOf(creation) + ":"
-				+ String.valueOf(requiredTime));
+				+ String.valueOf(getRequiredTime()));
 		writeClocks.newLine();
 		if (header) {
 			writeClocks
@@ -310,5 +310,9 @@ public class ClocktimeDatabase {
 			reader.close();
 			System.out.println("Loaded " + clocktimes.size() + " times.");
 		}
+	}
+
+	public long getRequiredTime() {
+		return requiredTime;
 	}
 }
