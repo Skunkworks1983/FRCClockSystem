@@ -23,6 +23,7 @@ import com.skunk.clock.db.Member.MemberType;
 public class ClocktimeDatabase {
 	private final Map<Member, Clocktime> clocktimes;
 	private long creation;
+	private long requiredTime = (long) (1000 * 60 * 60 * 2.5);
 
 	public ClocktimeDatabase() {
 		this.clocktimes = new HashMap<Member, Clocktime>();
@@ -195,7 +196,8 @@ public class ClocktimeDatabase {
 		if (creation < 0) {
 			creation = System.currentTimeMillis();
 		}
-		writeClocks.write(String.valueOf(creation));
+		writeClocks.write(String.valueOf(creation) + ":"
+				+ String.valueOf(requiredTime));
 		writeClocks.newLine();
 		if (header) {
 			writeClocks
@@ -218,11 +220,12 @@ public class ClocktimeDatabase {
 	 * @throws IOException
 	 *             if an error occurs
 	 */
-	public void cachedSave() throws IOException {
-		File oldClocks = new File("data/cached.csv");
-		File clocks = new File("data/cached.csv.tmp");
+	public void cachedSave(File oldClocks) throws IOException {
+		File tmpPath = new File(oldClocks.getAbsolutePath().concat(".tmp"));
+		File finalPath = new File(oldClocks.getAbsolutePath());
+		File oldPath = new File(oldClocks.getAbsolutePath().concat(".old"));
 
-		FileOutputStream fOut = new FileOutputStream(clocks);
+		FileOutputStream fOut = new FileOutputStream(tmpPath);
 		writeRawData(fOut, false);
 
 		fOut.flush();
@@ -235,10 +238,10 @@ public class ClocktimeDatabase {
 
 		if (oldClocks.exists()) {
 			System.out.println("Moving old cached data: "
-					+ oldClocks.renameTo(new File("data/cached.csv.old")));
+					+ oldClocks.renameTo(oldPath));
 		}
 		System.out.println("Moving new cached data: "
-				+ clocks.renameTo(new File("data/cached.csv")));
+				+ tmpPath.renameTo(finalPath));
 	}
 
 	/**
@@ -257,32 +260,20 @@ public class ClocktimeDatabase {
 			BufferedReader reader = new BufferedReader(new FileReader(clocks));
 			long timeStamp = -1;
 			try {
-				timeStamp = Long.valueOf(reader.readLine());
+				String[] header = reader.readLine().split(":");
+				timeStamp = Long.valueOf(header[0]);
+				if (header.length > 1) {
+					try {
+						long testTime = Long.valueOf(header[1]);
+						if (testTime > 0) {
+							requiredTime = testTime;
+						}
+					} catch (NumberFormatException e) {
+					}
+				}
 				if (!ignoreTimestamp
 						&& System.currentTimeMillis() - timeStamp > Configuration.CACHE_EXIPRY_TIME) {
 					System.out.println("...but the cached state has expired.");
-					// Move the old cache:
-					{
-						String date = Util.formatDate(new Date(timeStamp));
-						File oldClocks = new File("data/time_chunk_" + date
-								+ ".csv");
-						if (!oldClocks.exists()) {
-							ClocktimeDatabase oldCache = new ClocktimeDatabase();
-							oldCache.load(clocks, memDB, true);
-							FileOutputStream clocksFout = new FileOutputStream(
-									oldClocks);
-							oldCache.clockOutAllWith(1000 * 60 * 60);
-							oldCache.writeRawData(clocksFout, true);
-
-							try {
-								clocksFout.flush();
-								clocksFout.getFD().sync();
-							} catch (SyncFailedException e) {
-								System.out.println(e.getMessage());
-							}
-							clocksFout.close();
-						}
-					}
 					timeStamp = -1;
 				} else {
 					creation = timeStamp;

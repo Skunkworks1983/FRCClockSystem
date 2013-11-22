@@ -24,7 +24,10 @@ import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.SyncFailedException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -301,6 +304,41 @@ public class ClockGUI extends JFrame {
 		dirty.set(true);
 	}
 
+	public void checkCurrentDatabase() {
+		if (System.currentTimeMillis() - clockDB.getCreation() > Configuration.CACHE_EXIPRY_TIME) {
+			System.out.println("DUMPING DATABASE!!!!");
+			// output the database
+			clockDB.clockOutAllWith(60 * 60 * 1000);
+			try {
+				String date = Util.formatDate(new Date(clockDB.getCreation()));
+				File clocks = new File("data/time_chunk_" + date + ".csv");
+				clockDB.cachedSave(clocks);
+				try {
+					FileInputStream input = new FileInputStream(clocks);
+					FileOutputStream output = new FileOutputStream(new File(
+							clocks.getAbsolutePath().concat(".backup")));
+					byte[] buffer = new byte[1024];
+					int count;
+					while ((count = input.read(buffer)) > 0) {
+						output.write(buffer, 0, count);
+					}
+					try {
+						output.getFD().sync();
+					} catch (SyncFailedException e) {
+						System.out.println(e.getMessage());
+					}
+					output.close();
+					input.close();
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+				}
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+			}
+			clockDB = new ClocktimeDatabase();
+		}
+	}
+
 	/**
 	 * Clocks the user specified, with optional user interaction.
 	 * 
@@ -312,6 +350,7 @@ public class ClockGUI extends JFrame {
 	 *         Extended Error}
 	 */
 	public String[] clockInOut(String user, boolean interact) {
+		checkCurrentDatabase();
 		String[] errors = new String[] { "", "", "" };
 		boolean hadBadge = true;
 		try {
@@ -328,6 +367,7 @@ public class ClockGUI extends JFrame {
 					errors[1] = "Admins can't manipulate times through the terminal.";
 					return errors;
 				}
+				uuidEntryField.setText("OVERRIDE");
 				String modUserID = JOptionPane
 						.showInputDialog("Enter the user to modify.");
 				Member modUser = memDB.getMemberByBadge(user);
@@ -430,7 +470,9 @@ public class ClockGUI extends JFrame {
 			}
 			checkBuffers();
 			try {
-				clockDB.cachedSave();
+				String date = Util.formatDate(new Date(clockDB.getCreation()));
+				File clocks = new File("data/time_chunk_" + date + ".csv");
+				clockDB.cachedSave(clocks);
 			} catch (IOException e) {
 			}
 		} catch (NumberFormatException ex) {
@@ -834,7 +876,10 @@ public class ClockGUI extends JFrame {
 			}
 			System.out.println("Checking for recovery image...");
 			try {
-				clockDB.load(new File("data/cached.csv"), memDB, false);
+				String date = Util.formatDate(new Date(System
+						.currentTimeMillis()));
+				File clocks = new File("data/time_chunk_" + date + ".csv");
+				clockDB.load(clocks, memDB, false);
 			} catch (IOException e) {
 			}
 
