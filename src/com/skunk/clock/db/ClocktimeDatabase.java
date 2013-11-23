@@ -24,14 +24,19 @@ public class ClocktimeDatabase {
 	private final Map<Member, Clocktime> clocktimes;
 	private long creation;
 	private long requiredTime = (long) (1000 * 60 * 60 * 2.5);
+	private long modified;
 
 	public ClocktimeDatabase() {
 		this.clocktimes = new HashMap<Member, Clocktime>();
-		creation = System.currentTimeMillis();
+		modified = creation = System.currentTimeMillis();
 	}
 
 	public long getCreation() {
 		return creation;
+	}
+	
+	public long getModified() {
+		return modified;
 	}
 
 	public int[] getClockedByType(MemberType... types) {
@@ -93,6 +98,10 @@ public class ClocktimeDatabase {
 			}
 		}
 		return members;
+	}
+	
+	public void modifyCall() {
+		modified = System.currentTimeMillis();
 	}
 
 	public Clocktime getClocktime(Member mem) {

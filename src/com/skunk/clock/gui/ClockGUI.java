@@ -305,7 +305,11 @@ public class ClockGUI extends JFrame {
 	}
 
 	public void checkCurrentDatabase() {
-		if (System.currentTimeMillis() - clockDB.getCreation() > Configuration.CACHE_EXIPRY_TIME) {
+		String dateOld = Util.formatDate(new Date(clockDB.getModified()));
+		String dateNew = Util.formatDate(new Date());
+		// GOOD if (System.currentTimeMillis() - clockDB.getModified() >
+		// Configuration.CACHE_EXIPRY_TIME) {
+		if (!dateOld.equalsIgnoreCase(dateNew)) { // This might work though
 			System.out.println("DUMPING DATABASE!!!!");
 			// output the database
 			clockDB.clockOutAllWith(60 * 60 * 1000);
@@ -383,26 +387,26 @@ public class ClockGUI extends JFrame {
 							.showInputDialog("Enter the time offset in hours.");
 					try {
 						float hours = Float.valueOf(offset);
+						clockDB.modifyCall();
 						clockDB.getClocktime(modUser).adminClockIn(
 								System.currentTimeMillis()
 										- (long) (hours * 60f * 60f * 1000f));
 						if (!clockedIn.contains(modUser)) {
-
-						}
-						if (modUser.isInGroup(MemberGroup.LEAD)) {
-							clockedIn.add(0, modUser);
-						} else if (modUser.isInGroup(MemberGroup.SUBLEAD)) {
-							// Find the last lead; after that
-							int i = 0;
-							for (i = 0; i < clockedIn.size(); i++) {
-								if (!clockedIn.get(i).isInGroup(
-										MemberGroup.LEAD)) {
-									break;
+							if (modUser.isInGroup(MemberGroup.LEAD)) {
+								clockedIn.add(0, modUser);
+							} else if (modUser.isInGroup(MemberGroup.SUBLEAD)) {
+								// Find the last lead; after that
+								int i = 0;
+								for (i = 0; i < clockedIn.size(); i++) {
+									if (!clockedIn.get(i).isInGroup(
+											MemberGroup.LEAD)) {
+										break;
+									}
 								}
+								clockedIn.add(i, modUser);
+							} else {
+								clockedIn.add(modUser);
 							}
-							clockedIn.add(i, modUser);
-						} else {
-							clockedIn.add(modUser);
 						}
 						if (interact) {
 							lastMember = modUser;
@@ -416,6 +420,7 @@ public class ClockGUI extends JFrame {
 				if (clockedIn.contains(m)) {
 					clockedIn.remove(m);
 					clockDB.getClocktime(m).clockOut(hadBadge);
+					clockDB.modifyCall();
 					if (m.getType() == MemberType.COACH) {
 						if (!interact) {
 							errors[1] = "Coaches can't sign out through terminal...";
@@ -442,6 +447,7 @@ public class ClockGUI extends JFrame {
 						errors[0] = m.toString() + " checked out";
 					}
 				} else {
+					clockDB.modifyCall();
 					if (m.isInGroup(MemberGroup.LEAD)) {
 						clockedIn.add(0, m);
 					} else if (m.isInGroup(MemberGroup.SUBLEAD)) {
@@ -873,14 +879,16 @@ public class ClockGUI extends JFrame {
 			try {
 				memDB.read();
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			System.out.println("Checking for recovery image...");
 			try {
 				String date = Util.formatDate(new Date(System
 						.currentTimeMillis()));
 				File clocks = new File("data/time_chunk_" + date + ".csv");
-				clockDB.load(clocks, memDB, false);
+				clockDB.load(clocks, memDB, true);
 			} catch (IOException e) {
+				e.printStackTrace();
 			}
 
 			System.out.println("Preallocating clock db...");
@@ -907,6 +915,7 @@ public class ClockGUI extends JFrame {
 			try {
 				CreateMugs.run(memDB);
 			} catch (IOException e1) {
+				e1.printStackTrace();
 			}
 
 			System.out.println("Loading user images...");
