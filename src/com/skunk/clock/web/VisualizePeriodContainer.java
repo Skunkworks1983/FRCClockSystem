@@ -64,29 +64,7 @@ public class VisualizePeriodContainer extends APIHandler {
 				final long startTime = Long.valueOf(start);
 				final long endTime = Long.valueOf(end) < 0 ? Long.MAX_VALUE
 						: Long.valueOf(end);
-				File[] list = new File("./data")
-						.listFiles(new FilenameFilter() {
-							@Override
-							public boolean accept(File dir, String name) {
-								if (name.startsWith("time_chunk_")) {
-									// Parse as a date
-									String[] dateInfo = name.substring(11,
-											name.length() - 4).split("_");
-									if (dateInfo.length == 3) {
-										Calendar cal = Calendar.getInstance();
-										cal.set(Integer.valueOf(dateInfo[2]),
-												Integer.valueOf(dateInfo[1]) - 1,
-												Integer.valueOf(dateInfo[0]),
-												0, 0, 0);
-										if (cal.getTimeInMillis() >= startTime
-												&& cal.getTimeInMillis() <= endTime) {
-											return true;
-										}
-									}
-								}
-								return false;
-							}
-						});
+				File[] list = WebUtil.listOrderedDatabase(startTime, endTime);
 				TreeMap<Member, Clocktime> totalData = new TreeMap<Member, Clocktime>(
 						new Comparator<Member>() {
 							@Override

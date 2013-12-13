@@ -103,7 +103,7 @@ public class WebUtil {
 		final File[] list = new File("./data").listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
-				if (name.startsWith("time_chunk_")) {
+				if (name.startsWith("time_chunk_") && name.endsWith(".csv")) {
 					// Parse as a date
 					String[] dateInfo = name.substring(11, name.length() - 4)
 							.split("_");

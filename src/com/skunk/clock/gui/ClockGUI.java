@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.imageio.ImageIO;
@@ -50,6 +51,7 @@ import javax.swing.border.LineBorder;
 import com.skunk.clock.Configuration;
 import com.skunk.clock.CreateMugs;
 import com.skunk.clock.Util;
+import com.skunk.clock.db.Clocktime;
 import com.skunk.clock.db.ClocktimeDatabase;
 import com.skunk.clock.db.Member;
 import com.skunk.clock.db.Member.MemberGroup;
@@ -316,7 +318,9 @@ public class ClockGUI extends JFrame {
 			try {
 				String date = Util.formatDate(new Date(clockDB.getCreation()));
 				File clocks = new File("data/time_chunk_" + date + ".csv");
-				clockDB.cachedSave(clocks);
+				if (clockDB.getEntryCount() > 0) {
+					clockDB.cachedSave(clocks);
+				}
 				try {
 					FileInputStream input = new FileInputStream(clocks);
 					FileOutputStream output = new FileOutputStream(new File(
@@ -354,6 +358,18 @@ public class ClockGUI extends JFrame {
 	 *         Extended Error}
 	 */
 	public String[] clockInOut(String user, boolean interact) {
+		// Hot ones
+		if (interact && user.equalsIgnoreCase("999999")) {
+			clockedIn.clear();
+			List<Entry<Member, Clocktime>> clocked = clockDB
+					.getClockedListByType(MemberType.STUDENT, MemberType.COACH,
+							MemberType.MENTOR);
+			for (Entry<Member, Clocktime> m : clocked) {
+				addToClockList(m.getKey());
+			}
+			checkBuffers();
+			return new String[] { "", "", "" };
+		}
 		checkCurrentDatabase();
 		String[] errors = new String[] { "", "", "" };
 		boolean hadBadge = true;
@@ -391,23 +407,6 @@ public class ClockGUI extends JFrame {
 						clockDB.getClocktime(modUser).adminClockIn(
 								System.currentTimeMillis()
 										- (long) (hours * 60f * 60f * 1000f));
-						if (!clockedIn.contains(modUser)) {
-							if (modUser.isInGroup(MemberGroup.LEAD)) {
-								clockedIn.add(0, modUser);
-							} else if (modUser.isInGroup(MemberGroup.SUBLEAD)) {
-								// Find the last lead; after that
-								int i = 0;
-								for (i = 0; i < clockedIn.size(); i++) {
-									if (!clockedIn.get(i).isInGroup(
-											MemberGroup.LEAD)) {
-										break;
-									}
-								}
-								clockedIn.add(i, modUser);
-							} else {
-								clockedIn.add(modUser);
-							}
-						}
 						if (interact) {
 							lastMember = modUser;
 							lastMemberClockedTime = System.currentTimeMillis()
@@ -448,20 +447,7 @@ public class ClockGUI extends JFrame {
 					}
 				} else {
 					clockDB.modifyCall();
-					if (m.isInGroup(MemberGroup.LEAD)) {
-						clockedIn.add(0, m);
-					} else if (m.isInGroup(MemberGroup.SUBLEAD)) {
-						// Find the last lead; after that
-						int i = 0;
-						for (i = 0; i < clockedIn.size(); i++) {
-							if (!clockedIn.get(i).isInGroup(MemberGroup.LEAD)) {
-								break;
-							}
-						}
-						clockedIn.add(i, m);
-					} else {
-						clockedIn.add(m);
-					}
+					addToClockList(m);
 					clockDB.getClocktime(m).clockIn(hadBadge);
 					if (interact) {
 						lastMemberClockState = true;
@@ -490,6 +476,25 @@ public class ClockGUI extends JFrame {
 		}
 		uuidEntryField.requestFocus();
 		return errors;
+	}
+
+	private void addToClockList(Member modUser) {
+		if (!clockedIn.contains(modUser)) {
+			if (modUser.isInGroup(MemberGroup.LEAD)) {
+				clockedIn.add(0, modUser);
+			} else if (modUser.isInGroup(MemberGroup.SUBLEAD)) {
+				// Find the last lead; after that
+				int i = 0;
+				for (i = 0; i < clockedIn.size(); i++) {
+					if (!clockedIn.get(i).isInGroup(MemberGroup.LEAD)) {
+						break;
+					}
+				}
+				clockedIn.add(i, modUser);
+			} else {
+				clockedIn.add(modUser);
+			}
+		}
 	}
 
 	/**
@@ -717,6 +722,7 @@ public class ClockGUI extends JFrame {
 				isScreensaver.set(true);
 				if (lastScreensaverFrame + Configuration.SCREENSAVER_IMG_TIME < System
 						.currentTimeMillis()) {
+					checkCurrentDatabase(); // TODO Questionable
 					lastScreensaverFrame = System.currentTimeMillis();
 					if (currentScreensaver != null) {
 						// getGraphics().drawImage(currentScreensaver, 0, 0,

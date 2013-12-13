@@ -25,6 +25,7 @@ public class ClocktimeDatabase {
 	private long creation;
 	private long requiredTime = (long) (1000 * 60 * 60 * 2.5);
 	private long modified;
+	private String tag = null;
 
 	public ClocktimeDatabase() {
 		this.clocktimes = new HashMap<Member, Clocktime>();
@@ -34,7 +35,7 @@ public class ClocktimeDatabase {
 	public long getCreation() {
 		return creation;
 	}
-	
+
 	public long getModified() {
 		return modified;
 	}
@@ -99,7 +100,7 @@ public class ClocktimeDatabase {
 		}
 		return members;
 	}
-	
+
 	public void modifyCall() {
 		modified = System.currentTimeMillis();
 	}
@@ -205,8 +206,10 @@ public class ClocktimeDatabase {
 		if (creation < 0) {
 			creation = System.currentTimeMillis();
 		}
-		writeClocks.write(String.valueOf(creation) + ":"
-				+ String.valueOf(getRequiredTime()));
+		writeClocks.write(String.valueOf(creation)
+				+ ":"
+				+ String.valueOf(getRequiredTime()
+						+ (tag != null ? ":" + String.valueOf(tag) : "")));
 		writeClocks.newLine();
 		if (header) {
 			writeClocks
@@ -271,14 +274,19 @@ public class ClocktimeDatabase {
 			try {
 				String[] header = reader.readLine().split(":");
 				timeStamp = Long.valueOf(header[0]);
+				int tagHead = 1;
 				if (header.length > 1) {
 					try {
 						long testTime = Long.valueOf(header[1]);
+						tagHead = 2;
 						if (testTime > 0) {
 							requiredTime = testTime;
 						}
 					} catch (NumberFormatException e) {
 					}
+				}
+				if (header.length > tagHead) {
+					tag = header[tagHead].trim();
 				}
 				if (!ignoreTimestamp
 						&& System.currentTimeMillis() - timeStamp > Configuration.CACHE_EXIPRY_TIME) {
@@ -323,5 +331,13 @@ public class ClocktimeDatabase {
 
 	public long getRequiredTime() {
 		return requiredTime;
+	}
+
+	public String getTag() {
+		return tag;
+	}
+
+	public int getEntryCount() {
+		return clocktimes.size();
 	}
 }
