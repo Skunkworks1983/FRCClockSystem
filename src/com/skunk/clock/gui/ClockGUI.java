@@ -407,6 +407,7 @@ public class ClockGUI extends JFrame {
 						clockDB.getClocktime(modUser).adminClockIn(
 								System.currentTimeMillis()
 										- (long) (hours * 60f * 60f * 1000f));
+						addToClockList(modUser);
 						if (interact) {
 							lastMember = modUser;
 							lastMemberClockedTime = System.currentTimeMillis()
