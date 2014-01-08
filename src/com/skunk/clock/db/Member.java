@@ -10,7 +10,7 @@ public class Member {
 	private final String name;
 	private final Long uuid;
 	private final MemberType type;
-	private final MemberGroup[] group;
+	private final MemberGroup[] groups;
 	private final String badge, img;
 
 	public static enum MemberType {
@@ -30,8 +30,7 @@ public class Member {
 
 		public static MemberGroup matchGroup(String s) {
 			for (MemberGroup g : values()) {
-				if (g.name().equalsIgnoreCase(s.toUpperCase())
-						|| s.toUpperCase().equalsIgnoreCase(g.name())) {
+				if (g.name().equalsIgnoreCase(s)) {
 					return g;
 				}
 			}
@@ -45,9 +44,9 @@ public class Member {
 		this.uuid = uuid;
 		this.type = type;
 		if (group.length == 0) {
-			this.group = new MemberGroup[] { MemberGroup.UNDEFINED };
+			this.groups = new MemberGroup[] { MemberGroup.UNDEFINED };
 		} else {
-			this.group = group;
+			this.groups = group;
 		}
 		this.img = img;
 		this.badge = badge;
@@ -71,11 +70,11 @@ public class Member {
 	}
 
 	public MemberGroup[] getDisplayedGroups() {
-		return new MemberGroup[] { group[0] };
+		return new MemberGroup[] { groups[0] };
 	}
 
 	public MemberGroup[] getGroups() {
-		return group;
+		return groups;
 	}
 
 	public MemberType getType() {
@@ -107,9 +106,9 @@ public class Member {
 				+ Arrays.toString(getDisplayedGroups()) + "]";
 	}
 
-	public boolean isInGroup(MemberGroup lead) {
-		for (MemberGroup g : group) {
-			if (lead == g) {
+	public boolean isInGroup(MemberGroup test) {
+		for (MemberGroup g : groups) {
+			if (test == g) {
 				return true;
 			}
 		}

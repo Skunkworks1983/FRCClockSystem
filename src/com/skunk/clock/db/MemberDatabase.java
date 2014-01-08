@@ -43,7 +43,8 @@ public class MemberDatabase implements Iterable<Member> {
 			if (line == null) {
 				break;
 			}
-			currentLine++;
+			currentLine++; // Debug
+	
 			String[] chunks = line.split(",");
 			try {
 				if (chunks.length < 6) {
@@ -62,6 +63,7 @@ public class MemberDatabase implements Iterable<Member> {
 									+ Arrays.toString(MemberType.values())
 									+ " ");
 				}
+				
 				String[] sGroups = chunks[3].split(" ");
 				if (sGroups.length == 1 && sGroups[0].trim().length() == 0) {
 					sGroups = new String[0];
@@ -79,6 +81,7 @@ public class MemberDatabase implements Iterable<Member> {
 							+ " of 'data/members.csv'");
 					groups = new MemberGroup[] { MemberGroup.UNDEFINED };
 				}
+				
 				Member mem = new Member(uuid, chunks[2], chunks[4], chunks[5],
 						type, groups);
 				membersByUUID.put(uuid, mem);

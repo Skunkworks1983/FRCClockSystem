@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 public class Clocktime {
 	/**
 	 * The list of check in/out pairs.
+	 * If the clock in/out times are equal they haven't clocked out.
 	 */
 	private LinkedList<Entry<Long, Long>> times = new LinkedList<Entry<Long, Long>>();
 	/**
@@ -102,6 +103,7 @@ public class Clocktime {
 	 * 
 	 * @return the compiled string.
 	 */
+	
 	public String getChunksString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(times.size());

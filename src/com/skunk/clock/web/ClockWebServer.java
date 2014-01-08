@@ -28,6 +28,7 @@ public class ClockWebServer implements Container {
 		containers.put("list", new CurrentDataContainer(this));
 		containers.put("visual/day", new VisualizeDayContainer(this));
 		containers.put("visual/period", new VisualizePeriodContainer(this));
+		containers.put("raw/period", new RawPeriodContainer(this));
 		containers.put("visual/user", new VisualizeUserContainer(this));
 		containers.put("graph/user", new GraphUserContainer(this));
 		containers.put("visual/user/image", new GetUserImage(this));

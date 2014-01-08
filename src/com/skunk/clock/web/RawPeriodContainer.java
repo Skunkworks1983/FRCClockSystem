@@ -1,7 +1,6 @@
 package com.skunk.clock.web;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -17,18 +16,16 @@ import com.skunk.clock.db.ClocktimeDatabase;
 import com.skunk.clock.db.Member;
 import com.skunk.clock.db.Member.MemberType;
 
-public class VisualizePeriodContainer extends APIHandler {
+public class RawPeriodContainer extends APIHandler {
 	private static final long DEFAULT_LENGTH = 1000 * 60 * 60 * 24 * 7; // 1
 																		// week
 
-	public VisualizePeriodContainer(ClockWebServer clockWebServer) {
+	public RawPeriodContainer(ClockWebServer clockWebServer) {
 		super(clockWebServer);
 	}
 
 	@Override
 	public void appendContent(Request request, PrintStream body) {
-		body.println("<html><head>");
-
 		Map<String, String> data = WebUtil.decodeGET(request.getTarget());
 		String start = data.get("start");
 		String end = data.get("end");
@@ -48,6 +45,7 @@ public class VisualizePeriodContainer extends APIHandler {
 			flaggy = true;
 		}
 		if (flaggy) {
+			body.println("<html><head>");
 			body.println("<link rel=\"stylesheet\" href=\"/data/resources/datepickr.css\" type=\"text/css\" media=\"screen\">");
 			body.println("<meta charset=\"utf-8\"><script src=\"/data/resources/datepickr.min.js\"></script>");
 			body.println("</head><body>");
@@ -59,6 +57,7 @@ public class VisualizePeriodContainer extends APIHandler {
 			body.println("<input type='checkbox' name='parts'>Show Days</option><span style='padding: 0px 25px;'>|</span>");
 			body.println("<input type='submit'/></form>");
 			body.println("<script type='text/javascript'>new datepickr('dateEnterB', {'dateFormat': 's'});new datepickr('dateEnterA', {'dateFormat': 's'});</script>");
+			body.println("</body></html>");
 		} else {
 			if (start != null && end != null) {
 				final long startTime = Long.valueOf(start);
@@ -108,50 +107,34 @@ public class VisualizePeriodContainer extends APIHandler {
 						supp.insertClockTime(entry.getValue());
 					}
 				}
-				body.println("<style type='text/css'>\n"
-						+ WebUtil.getTableStyle() + "\n</style>");
-				body.println("</head><body>");
-
-				body.println("From " + WebUtil.formatDate(startTime) + " to "
-						+ WebUtil.formatDate(endTime) + "</br>");
 				if (totalData.size() != 0) {
-					body.println("Days: " + list.length + "</br>");
-					body.println("<table id='greenTable'>");
-					body.println("<tr>");
-					body.println("<tr><th>User</th><th>Total Time</th><th>Total %</th>");
+					body.print("User,Total Time,Total %");
 					if (showParts) {
 						for (Long db : dayData.keySet()) {
-							body.println("<th>" + WebUtil.formatDate(db)
-									+ "</th>");
+							body.print("," + WebUtil.formatDate(db));
 						}
 					}
-					body.println("</tr>");
+					body.println();
 					for (Entry<Member, Clocktime> entry : totalData.entrySet()) {
-						body.println("<tr><td>"
-								+ entry.getKey().getName()
-								+ "</td><td>"
-								+ WebUtil.formatTimeShort(entry.getValue()
-										.getClockTime())
-								+ "</td><td>"
+						body.print(entry.getKey().getName()
+								+ ","
+								+ entry.getValue().getClockTime()
+								+ ","
 								+ WebUtil.formatPercentage(entry.getValue()
-										.getClockTime(), totalTime) + "</td>");
+										.getClockTime(), totalTime));
 						if (showParts) {
 							for (ClocktimeDatabase db : dayData.values()) {
 								Clocktime c = db.getClocktime(entry.getKey());
-								body.println("<td>"
-										+ WebUtil.formatTimeShort(c != null ? c
-												.getClockTime() : 0) + "</td>");
+								body.print(","
+										+ (c != null ? c.getClockTime() : 0));
 							}
 						}
-						body.println("</tr>");
+						body.println();
 					}
-					body.println("</table>");
 				}
 			} else {
 				body.println("Requires a start and end key!");
 			}
 		}
-
-		body.println("</body></html>");
 	}
 }

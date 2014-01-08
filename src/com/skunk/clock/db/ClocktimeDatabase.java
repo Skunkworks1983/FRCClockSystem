@@ -23,7 +23,7 @@ import com.skunk.clock.db.Member.MemberType;
 public class ClocktimeDatabase {
 	private final Map<Member, Clocktime> clocktimes;
 	private long creation;
-	private long requiredTime = (long) (1000 * 60 * 60 * 2.5);
+	private long requiredTime = (long) (1000 * 60 * 60 * 3);
 	private long modified;
 	private String tag = null;
 
@@ -40,6 +40,15 @@ public class ClocktimeDatabase {
 		return modified;
 	}
 
+	/**
+	 * Returns the number of people that are clocked in of any of the types
+	 * provided.
+	 * 
+	 * @param types
+	 *            The types to count.
+	 * @return an array of numbers mapped to the indices of the member groups.
+	 *         The first one is the total.
+	 */
 	public int[] getClockedByType(MemberType... types) {
 		int[] count = new int[MemberGroup.values().length + 1];
 		for (Entry<Member, Clocktime> entry : clocktimes.entrySet()) {
@@ -65,6 +74,13 @@ public class ClocktimeDatabase {
 		return count;
 	}
 
+	/**
+	 * Grabs a list of everyone clocked in by their member type. If no types are
+	 * set it returns all the clocked in members.
+	 * 
+	 * @param types
+	 * @return the list of members mapped to clocktimes
+	 */
 	public List<Entry<Member, Clocktime>> getClockedListByType(
 			MemberType... types) {
 		List<Entry<Member, Clocktime>> members = new ArrayList<Entry<Member, Clocktime>>();
@@ -85,6 +101,13 @@ public class ClocktimeDatabase {
 		return members;
 	}
 
+	/**
+	 * Grabs a list of everyone added to this database by their member type. If
+	 * no types are set it returns all the clocked in members.
+	 * 
+	 * @param types
+	 * @return the list of members mapped to clocktimes
+	 */
 	public List<Entry<Member, Clocktime>> getListByType(MemberType... types) {
 		List<Entry<Member, Clocktime>> members = new ArrayList<Entry<Member, Clocktime>>();
 		for (Entry<Member, Clocktime> entry : clocktimes.entrySet()) {
@@ -101,6 +124,10 @@ public class ClocktimeDatabase {
 		return members;
 	}
 
+	/**
+	 * Sets that this database was just modified. Updates the modified time to
+	 * the current time.
+	 */
 	public void modifyCall() {
 		modified = System.currentTimeMillis();
 	}
@@ -159,7 +186,7 @@ public class ClocktimeDatabase {
 			if (clock.getValue().getClockTime() > 0) {
 				writeTotals.write(clock.getKey().getUUID() + ","
 						+ clock.getValue().getClockTime() + ","
-						+ clock.getValue().getClockTime() / 60000 + ","
+						+ clock.getValue().getClockTime() / (60 * 1000) + ","
 						+ clock.getValue().getMissingBadgeCount());
 				writeTotals.newLine();
 			}

@@ -113,23 +113,28 @@ public class ClockGUI extends JFrame {
 	 * The last member to clock in or out.
 	 */
 	private Member lastMember;
+
 	/**
 	 * The time at which the last member clocked in or out. This allows it to
 	 * stop showing after a certain amount of time.
 	 */
 	private long lastMemberClockedTime;
+
 	/**
 	 * The clock in/out state of the currently displaying member.
 	 */
 	private boolean lastMemberClockState;
+
 	/**
 	 * The last time there was an action on the frame.
 	 */
 	private long lastFrameAction = System.currentTimeMillis();
+
 	/**
 	 * The last time the screensaver frame was updated.
 	 */
 	private long lastScreensaverFrame = 0;
+
 	/**
 	 * If the frame currently shows the screensaver.
 	 */
@@ -414,16 +419,21 @@ public class ClockGUI extends JFrame {
 									- (long) (hours * 24f * 60f * 60f * 1000f);
 						}
 					} catch (Exception e) {
+						errors[1] = "A-BT";
+						errors[2] = "Admin - Bad Time (" + e.toString() + ")";
 					}
+				} else {
+					errors[1] = "A-NaM";
+					errors[2] = "Admin - Not A Member";
 				}
 			} else {
-				if (clockedIn.contains(m)) {
+				if (clockDB.getClocktime(m).isClockedIn()) {
 					clockedIn.remove(m);
 					clockDB.getClocktime(m).clockOut(hadBadge);
 					clockDB.modifyCall();
 					if (m.getType() == MemberType.COACH) {
 						if (!interact) {
-							errors[1] = "Coaches can't sign out through terminal...";
+							errors[1] = "Coaches can't bulk sign out through terminal...";
 							return errors;
 						}
 						if (JOptionPane.showConfirmDialog(this,
@@ -813,17 +823,17 @@ public class ClockGUI extends JFrame {
 		float panelsHeight = 0;
 		for (int i = 1; i < studentCount.length; i++) {
 			if (studentCount[i] > 0) {
-				panelsHeight += 18f / (Configuration.MUG_HEIGHT + Configuration.MUG_V_PADDING);
-				groupBaseline[i - 1] = (int) (panelsHeight * (float) (Configuration.MUG_HEIGHT + Configuration.MUG_V_PADDING));
+				panelsHeight += 18f;
+				groupBaseline[i - 1] = (int) (panelsHeight);
 				panelsHeight += (int) Math.ceil(((float) studentCount[i])
-						/ ((float) panelWidth));
+						/ ((float) panelWidth))
+						* (float) (Configuration.MUG_HEIGHT + Configuration.MUG_V_PADDING);
 			} else {
 				groupBaseline[i - 1] = -1;
 			}
 		}
-		studentBuffer = createVolatileImage(
-				studentPanel.getWidth() - studentScroll.getWidth(),
-				(int) (panelsHeight * (float) (Configuration.MUG_HEIGHT + Configuration.MUG_V_PADDING)) + 1);
+		studentBuffer = createVolatileImage(studentPanel.getWidth()
+				- studentScroll.getWidth(), (int) (panelsHeight) + 1);
 		// scroll bars
 		int scroll = studentBuffer.getHeight() - studentPanel.getHeight() + 1;
 		if (scroll <= 0) {
@@ -899,22 +909,10 @@ public class ClockGUI extends JFrame {
 			}
 
 			System.out.println("Preallocating clock db...");
+			clockedIn.clear();
 			for (Member m : memDB) {
 				if (clockDB.getClocktime(m).isClockedIn()) {
-					if (m.isInGroup(MemberGroup.LEAD)) {
-						clockedIn.add(0, m);
-					} else if (m.isInGroup(MemberGroup.SUBLEAD)) {
-						// Find the last lead; after that
-						int i = 0;
-						for (i = 0; i < clockedIn.size(); i++) {
-							if (!clockedIn.get(i).isInGroup(MemberGroup.LEAD)) {
-								break;
-							}
-						}
-						clockedIn.add(i, m);
-					} else {
-						clockedIn.add(m);
-					}
+					addToClockList(m);
 				}
 			}
 
