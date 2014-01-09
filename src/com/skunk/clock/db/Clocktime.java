@@ -1,13 +1,14 @@
 package com.skunk.clock.db;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
-public class Clocktime {
+public class Clocktime implements Iterable<Entry<Long, Long>> {
 	/**
-	 * The list of check in/out pairs.
-	 * If the clock in/out times are equal they haven't clocked out.
+	 * The list of check in/out pairs. If the clock in/out times are equal they
+	 * haven't clocked out.
 	 */
 	private LinkedList<Entry<Long, Long>> times = new LinkedList<Entry<Long, Long>>();
 	/**
@@ -103,7 +104,7 @@ public class Clocktime {
 	 * 
 	 * @return the compiled string.
 	 */
-	
+
 	public String getChunksString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(times.size());
@@ -155,5 +156,10 @@ public class Clocktime {
 		for (Entry<Long, Long> tt : db.times) {
 			times.add(tt);
 		}
+	}
+
+	@Override
+	public Iterator<Entry<Long, Long>> iterator() {
+		return times.iterator();
 	}
 }

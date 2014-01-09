@@ -98,6 +98,11 @@ public class MemberDatabase implements Iterable<Member> {
 				+ " records from '" + f.getName() + "'");
 		read.close();
 	}
+	
+	void insertMember(Member mem) {
+		membersByUUID.put(mem.getUUID(), mem);
+		membersByBadge.put(mem.getBadge(), mem);
+	}
 
 	@Override
 	public Iterator<Member> iterator() {
