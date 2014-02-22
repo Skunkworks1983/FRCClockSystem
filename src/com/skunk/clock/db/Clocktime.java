@@ -1,6 +1,7 @@
 package com.skunk.clock.db;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
@@ -161,5 +162,10 @@ public class Clocktime implements Iterable<Entry<Long, Long>> {
 	@Override
 	public Iterator<Entry<Long, Long>> iterator() {
 		return times.iterator();
+	}
+
+	public Collection<? extends Entry<Long, Long>> getChunks() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

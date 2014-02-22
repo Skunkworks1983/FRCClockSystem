@@ -15,6 +15,11 @@ import org.simpleframework.transport.Server;
 import org.simpleframework.transport.connect.Connection;
 import org.simpleframework.transport.connect.SocketConnection;
 
+import com.skunk.clock.web.visual.DatabaseEntryContainer;
+import com.skunk.clock.web.visual.VisualizeDayContainer;
+import com.skunk.clock.web.visual.VisualizePeriodContainer;
+import com.skunk.clock.web.visual.VisualizeUserContainer;
+
 public class ClockWebServer implements Container {
 	private Map<String, Container> containers = new HashMap<String, Container>();
 	private DatabaseController db;
@@ -33,6 +38,7 @@ public class ClockWebServer implements Container {
 		containers.put("graph/user", new GraphUserContainer(this));
 		containers.put("visual/user/image", new GetUserImage(this));
 		containers.put("data/resources/*", new ResourceContainer());
+		containers.put("visual/dbentry", new DatabaseEntryContainer(this));
 		db = new DatabaseController();
 	}
 

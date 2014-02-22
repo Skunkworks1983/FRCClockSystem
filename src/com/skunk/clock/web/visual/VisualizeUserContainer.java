@@ -1,4 +1,4 @@
-package com.skunk.clock.web;
+package com.skunk.clock.web.visual;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -11,6 +11,9 @@ import com.skunk.clock.db.Clocktime;
 import com.skunk.clock.db.ClocktimeDatabase;
 import com.skunk.clock.db.Member;
 import com.skunk.clock.db.Member.MemberGroup;
+import com.skunk.clock.web.APIHandler;
+import com.skunk.clock.web.ClockWebServer;
+import com.skunk.clock.web.WebUtil;
 
 public class VisualizeUserContainer extends APIHandler {
 	private static final long DEFAULT_LENGTH = 1000 * 60 * 60 * 24 * 7; // 1
