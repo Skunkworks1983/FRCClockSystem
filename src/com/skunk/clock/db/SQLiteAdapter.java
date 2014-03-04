@@ -3,17 +3,13 @@ package com.skunk.clock.db;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map.Entry;
 
 import com.skunk.clock.db.Member.MemberGroup;
@@ -70,9 +66,10 @@ public class SQLiteAdapter {
 					+ "`end` datetime(12) NOT NULL,"
 					+ "UNIQUE (`uuid`,`start`)" + ")");
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS `events` ("
-					+ "`day` date(10) NOT NULL,"
+					+ "`start` datetime(12) NOT NULL,"
+					+ "`end` datetime(12) NOT NULL,"
 					+ "`name` varchar(50) NOT NULL,"
-					+ "`required` int(12) NOT NULL," + "PRIMARY KEY (`day`)"
+					+ "`required` int(12) NOT NULL," + "PRIMARY KEY (`start`)"
 					+ ")");
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
@@ -217,45 +214,19 @@ public class SQLiteAdapter {
 		}
 	}
 
-	private List<Entry<Long, Long>> loadClocktimeObjects(Member member,
-			long start, long end) {
-		List<Entry<Long, Long>> clocktimes = new ArrayList<Entry<Long, Long>>();
+	private void createEvent(long begin, long end, String name, long required) {
 		try {
-			Statement statement = connection.createStatement();
-			ResultSet set = statement.executeQuery("SELECT * FROM `clocktimes`"
-					+ "WHERE `uuid`=" + member.getUUID()
-					+ (start > 0 || end > 0 ? " AND ( " : "")
-					+ (start > 0 ? "`start`>" + start : "")
-					+ (start > 0 && end > 0 ? " AND " : "")
-					+ (end > 0 ? "`start`<" + end : "")
-					+ (start > 0 || end > 0 ? ")" : ""));
-			while (set.next()) {
-				clocktimes.add(new AbstractMap.SimpleEntry<Long, Long>(set
-						.getTimestamp(1).getTime(), set.getTimestamp(2)
-						.getTime()));
-			}
-			set.close();
-			statement.close();
-		} catch (SQLException e) {
-			System.err.println(e.getMessage());
-		}
-		return clocktimes;
-	}
-
-	private void createEvent(Date time, String name, long required) {
-		try {
-			Date day = new Date(time.getTime());
-
 			PreparedStatement insert = connection
-					.prepareStatement("INSERT INTO `events` (`day`, `name`, `required`) "
-							+ "VALUES (?, ?, ?);");
-			insert.setDate(1, day);
+					.prepareStatement("INSERT INTO `events` (`start`, `end`, `name`, `required`) "
+							+ "VALUES (?, ?, ?, ?);");
+			insert.setTimestamp(1, new Timestamp(begin));
+			insert.setTimestamp(2, new Timestamp(end));
 			if (name != null) {
-				insert.setString(2, name);
+				insert.setString(3, name);
 			} else {
-				insert.setString(2, "");
+				insert.setString(3, "");
 			}
-			insert.setLong(3, required);
+			insert.setLong(4, required);
 			insert.executeUpdate();
 			insert.close();
 		} catch (SQLException e) {
@@ -265,8 +236,8 @@ public class SQLiteAdapter {
 
 	public void saveClocktimeDB(ClocktimeDatabase db) {
 		// Create event tag
-		createEvent(new Date(db.getCreation()), db.getTag(),
-				db.getRequiredTime());
+		createEvent(db.getCreation(), db.getCreation() + db.getRequiredTime(),
+				db.getTag(), db.getRequiredTime());
 
 		// Save clocktimes
 		for (Entry<Member, Clocktime> ent : db.getListByType()) {
@@ -274,20 +245,18 @@ public class SQLiteAdapter {
 		}
 	}
 
-	public ClocktimeDatabase loadClocktimeDB(MemberDatabase memDB, java.util.Date day) {
+	public ClocktimeDatabase loadClocktimeDB(MemberDatabase memDB, long start,
+			long end) {
 		// Ensure there are no time mistakes
-		@SuppressWarnings("deprecation")
-		Date start = new Date(day.getYear(), day.getMonth(), day.getDay());
-		Date end = new Date(start.getTime() + (24 * 60 * 60 * 1000 - 1));
-
 		ClocktimeDatabase clockDB = new ClocktimeDatabase();
+		clockDB.creation = start;
+		clockDB.requiredTime = end - start;
 
 		// Merge dat shit
 		try {
 			Statement statement = connection.createStatement();
 			ResultSet set = statement.executeQuery("SELECT * FROM `clocktimes`"
-					+ "WHERE `start`>=" + start.getTime() + " AND "
-					+ "`start`<=" + end.getTime());
+					+ "WHERE `start`>=" + start + " AND " + "`start`<=" + end);
 			while (set.next()) {
 				clockDB.getClocktime(memDB.getMemberByUUID(set.getInt(1)))
 						.insertClockTime(set.getTimestamp(2).getTime(),

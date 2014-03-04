@@ -17,6 +17,7 @@ import org.simpleframework.transport.connect.SocketConnection;
 
 import com.skunk.clock.web.visual.DatabaseEntryContainer;
 import com.skunk.clock.web.visual.VisualizeDayContainer;
+import com.skunk.clock.web.visual.VisualizeGroupContainer;
 import com.skunk.clock.web.visual.VisualizePeriodContainer;
 import com.skunk.clock.web.visual.VisualizeUserContainer;
 
@@ -39,6 +40,7 @@ public class ClockWebServer implements Container {
 		containers.put("visual/user/image", new GetUserImage(this));
 		containers.put("data/resources/*", new ResourceContainer());
 		containers.put("visual/dbentry", new DatabaseEntryContainer(this));
+		containers.put("visual/groups", new VisualizeGroupContainer(this));
 		db = new DatabaseController();
 	}
 

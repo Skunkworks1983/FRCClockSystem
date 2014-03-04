@@ -22,8 +22,8 @@ import com.skunk.clock.db.Member.MemberType;
 
 public class ClocktimeDatabase {
 	private final Map<Member, Clocktime> clocktimes;
-	private long creation;
-	private long requiredTime = (long) (1000 * 60 * 60 * 3);
+	long creation;
+	long requiredTime = (long) (1000 * 60 * 60 * 3);
 	private long modified;
 	private String tag = null;
 

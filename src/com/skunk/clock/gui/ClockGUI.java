@@ -409,14 +409,21 @@ public class ClockGUI extends JFrame {
 					try {
 						float hours = Float.valueOf(offset);
 						clockDB.modifyCall();
-						clockDB.getClocktime(modUser).adminClockIn(
-								System.currentTimeMillis()
-										- (long) (hours * 60f * 60f * 1000f));
+						if (clockDB.getClocktime(modUser).isClockedIn()) {
+							clockDB.getClocktime(modUser)
+									.adminClockOut(
+											System.currentTimeMillis()
+													+ (long) (hours * 60f * 60f * 1000f));
+						} else {
+							clockDB.getClocktime(modUser)
+									.adminClockIn(
+											System.currentTimeMillis()
+													- (long) (hours * 60f * 60f * 1000f));
+						}
 						addToClockList(modUser);
 						if (interact) {
 							lastMember = modUser;
-							lastMemberClockedTime = System.currentTimeMillis()
-									- (long) (hours * 24f * 60f * 60f * 1000f);
+							lastMemberClockedTime = System.currentTimeMillis();
 						}
 					} catch (Exception e) {
 						errors[1] = "A-BT";

@@ -155,6 +155,19 @@ public class VisualizePeriodContainer extends APIHandler {
 						}
 					}
 					body.println("</tr>");
+					{
+						body.println("<tr><td>" + "Required" + "</td><td>"
+								+ WebUtil.formatTimeShort(totalTime)
+								+ "</td><td></td>");
+						if (showParts) {
+							for (ClocktimeDatabase db : dayData.values()) {
+								body.println("<td>"
+										+ WebUtil.formatTimeShort(db
+												.getRequiredTime()) + "</td>");
+							}
+						}
+						body.println("</tr>");
+					}
 					for (Member key : memberKeys) {
 						Clocktime value = totalData.get(key);
 						body.println("<tr><td>"

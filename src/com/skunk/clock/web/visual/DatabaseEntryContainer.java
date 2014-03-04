@@ -110,16 +110,12 @@ public class DatabaseEntryContainer extends APIHandler {
 				if (totalData.size() != 0) {
 					body.println("<table id='greenTable'>");
 					body.println("<tr>");
-					body.println("<tr><th>Group</th><th>User</th><th>Time IN</th><th>Time OUT</th>");
+					body.println("<tr><th>User</th><th>Time IN</th><th>Time OUT</th>");
 					body.println("</tr>");
 					for (Entry<Member, List<Entry<Long, Long>>> ent : totalData
 							.entrySet()) {
 						for (Entry<Long, Long> time : ent.getValue()) {
-							body.println("<tr><td>"
-									+ (ent.getKey().getGroups().length > 0 ? ent
-											.getKey().getGroups()[0]
-											.formattedName() : "")
-									+ "</td><td>" + ent.getKey().getName()
+							body.println("<tr><td>" + ent.getKey().getName()
 									+ "</td>");
 							body.println("<td>"
 									+ WebUtil.formatDateTime(time.getKey())

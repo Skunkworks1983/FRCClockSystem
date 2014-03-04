@@ -50,6 +50,15 @@ public class Clocktime implements Iterable<Entry<Long, Long>> {
 	}
 
 	/**
+	 * Clocks this object out at the given time.
+	 */
+	public void adminClockOut(long time) {
+		if (isClockedIn()) {
+			times.getLast().setValue(time);
+		}
+	}
+
+	/**
 	 * Clocks this object out at the current time, increasing the missing badge
 	 * count by one if they didn't have a badge.
 	 * 
